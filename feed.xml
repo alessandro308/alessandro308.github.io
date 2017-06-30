@@ -1,0 +1,599 @@
+<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xml" href="http://apagiaro.it/feed.xslt.xml"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.2.1">Jekyll</generator><link href="http://apagiaro.it/feed.xml" rel="self" type="application/atom+xml" /><link href="http://apagiaro.it/" rel="alternate" type="text/html" /><updated>2017-06-29T20:20:57+02:00</updated><id>http://apagiaro.it/</id><title type="html">Alessandro Pagiaro</title><subtitle>Studente di Informatica presso l'Università di Pisa. Scout a tempo perso.</subtitle><entry><title type="html">Come aggiungere a WooCommerce articoli con variazione via codice (programmatically)</title><link href="http://apagiaro.it/variable-product-programmatically/" rel="alternate" type="text/html" title="Come aggiungere a WooCommerce articoli con variazione via codice (programmatically)" /><published>2017-06-27T00:00:00+02:00</published><updated>2017-06-27T00:00:00+02:00</updated><id>http://apagiaro.it/variable-product-programmatically</id><content type="html" xml:base="http://apagiaro.it/variable-product-programmatically/">&lt;p&gt;&lt;img src=&quot;http://apagiaro.it/assets/img/post-image/woocommerce.png&quot; style=&quot;float:left; margin: 15px;&quot; /&gt;Woocommerce è il più famoso plugin di Wordpress per la realizzazione di siti eCommerce. I suoi punti di forza sono tantissimi tra i quali la personalizzazione estrame dei prodotti. Il problema che però spesso si incontra è come caricare in maniera efficiente le decine e decine di prodotti senza perderci le giornate intere?&lt;/p&gt;
+
+&lt;p&gt;Quello che cercherò di fare io ora, è arrivare ad una soluzione per aggiungere prodotti con variazioni, via codice, andando quindi a velocizzare la fare di inserimento.
+&lt;br /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;cosa-sono-i-prodotti-con-variazione&quot;&gt;Cosa sono i prodotti con variazione&lt;/h1&gt;
+&lt;p&gt;I prodotti con variazione sono quelli oggetti che hanno varie opzioni personalizzabili dall’utente durante la fase di acquisto e il cui prezzo viene modificato in base a queste scelte. Un classico esempio è una tipografia online che vende un volantino che può essere:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;A4, A5 o in A6&lt;/li&gt;
+  &lt;li&gt;Con 1 colore, 2 colori o 4 colori&lt;/li&gt;
+  &lt;li&gt;Su Carta lucida o carta opaca&lt;/li&gt;
+  &lt;li&gt;Con grammatura 100, 150 o 200gr&lt;/li&gt;
+  &lt;li&gt;Solo fronte o Fronte/Retro&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;WooCommerce ci permette di aggiungere per ogni possibile scelta dell’utente un prezzo, ad esempio posso specificare che&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;A4, 1 Colore, Lucida, 100gr, Fronte = 10€&lt;/li&gt;
+  &lt;li&gt;A4, 2 colori, Opaca, 100gr, F/R = 12€&lt;/li&gt;
+  &lt;li&gt;… ecc ecc&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Il problema, come quelli più bravi di voi in combinatoria avranno già visto, è che con anche quelle semplici opzioni definite prima, abbiamo da specificare 108 possibili scelte dell’utente con conseguente impiego di tempo per il caricamente del prodotto. L’idea è quindi quella di trovare un modo più efficiente per fare tutto&lt;/p&gt;
+
+&lt;p&gt;L’intuizione è quella di creare una funzione in un qualche linguaggio che, date le scelte ed un file CSV (cioè l’esportazione di un file Excel che ci passerà il cliente), ci generi del codice che aggiunge al DB i prodotti comprensivi di variazioni e prezzi.&lt;/p&gt;
+
+&lt;h1 id=&quot;il-database&quot;&gt;Il database&lt;/h1&gt;
+&lt;p&gt;Qui inizia il bello, abbiamo vari modi, uno brutale (leggasi SQL puro), l’altro più raffinato che prevede l’impiego delle API di Wordpress. Andiamo a vedere questo secondo approccio perchè più sicuro e veloce.&lt;/p&gt;
+
+&lt;p&gt;Una rapida ricerca online ci porta a capire quali sono le API che ci interessano in questa fase:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;wp_insert_post()&lt;/code&gt; - Insert or update a post. &lt;a href=&quot;https://developer.wordpress.org/reference/functions/wp_insert_post/&quot;&gt;doc&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;update_post_meta()&lt;/code&gt; - Update post meta field based on post ID. &lt;a href=&quot;https://developer.wordpress.org/reference/functions/update_post_meta/&quot;&gt;doc&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;wp_set_object_terms()&lt;/code&gt; - Create Term and Taxonomy Relationships. &lt;a href=&quot;https://developer.wordpress.org/reference/functions/wp_set_object_terms/&quot;&gt;doc&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;update_post_meta()&lt;/code&gt; - Update post meta field based on post ID. &lt;a href=&quot;https://developer.wordpress.org/reference/functions/update_post_meta/&quot;&gt;doc&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Per prima cosa dobbiamo inserire il nostro post nella relativa tabella usando la funzione di Wordpress &lt;code class=&quot;highlighter-rouge&quot;&gt;wp_insert_post&lt;/code&gt; e tenendoci poi in memoria il relativo &lt;code class=&quot;highlighter-rouge&quot;&gt;post_id&lt;/code&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$product_title = &quot;Titolo del prodotto&quot;;
+$product_description = &quot;Descrizione del prodotto&quot;;
+$post = array(
+        'post_author'  =&amp;gt; 1,
+        'post_content' =&amp;gt; $product_description,
+        'post_status'  =&amp;gt; 'publish',
+        'post_title'   =&amp;gt; $product_title,
+        'post_parent'  =&amp;gt; '',
+        'post_type'    =&amp;gt; 'product'
+    );
+$post_id = wp_insert_post($post); 
+if(!$post_id){
+	return false; // Si è verificato un errore
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Andiamo quindi ad aggiungere altre proprietà del prodotto (generico, senza variazioni), con la funzione &lt;code class=&quot;highlighter-rouge&quot;&gt;update_post_meta&lt;/code&gt; e con la funzione &lt;code class=&quot;highlighter-rouge&quot;&gt;wp_set_object_terms&lt;/code&gt; che modifica le tabelle &lt;code class=&quot;highlighter-rouge&quot;&gt;wp_terms&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;wp_term_relationships&lt;/code&gt; e &lt;code class=&quot;highlighter-rouge&quot;&gt;wp_term_taxonomy&lt;/code&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;$product_categories = array(&quot;Volantini&quot;, &quot;Piccolo Formato&quot;);
+update_post_meta( $post_id,'_visibility','visible');
+wp_set_object_terms( $post_id, $product_categories, 'product_cat');
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Altre proprietà, i cui nomi sono abbastanza esplicativi, che possiamo andare ad impostare in questa maniera sono le seguenti:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;_wc_review_count&lt;/li&gt;
+  &lt;li&gt;_wc_rating_count&lt;/li&gt;
+  &lt;li&gt;_wc_average_rating&lt;/li&gt;
+  &lt;li&gt;_edit_last&lt;/li&gt;
+  &lt;li&gt;_edit_lock&lt;/li&gt;
+  &lt;li&gt;_sku&lt;/li&gt;
+  &lt;li&gt;_regular_price&lt;/li&gt;
+  &lt;li&gt;_sale_price&lt;/li&gt;
+  &lt;li&gt;_sale_price_dates_from&lt;/li&gt;
+  &lt;li&gt;_sale_price_dates_to&lt;/li&gt;
+  &lt;li&gt;total_sales&lt;/li&gt;
+  &lt;li&gt;_tax_status&lt;/li&gt;
+  &lt;li&gt;_tax_class&lt;/li&gt;
+  &lt;li&gt;_manage_stock&lt;/li&gt;
+  &lt;li&gt;_backorders&lt;/li&gt;
+  &lt;li&gt;_sold_individually&lt;/li&gt;
+  &lt;li&gt;_weight&lt;/li&gt;
+  &lt;li&gt;_length&lt;/li&gt;
+  &lt;li&gt;_width&lt;/li&gt;
+  &lt;li&gt;_height&lt;/li&gt;
+  &lt;li&gt;_upsell_ids&lt;/li&gt;
+  &lt;li&gt;_crosssell_ids&lt;/li&gt;
+  &lt;li&gt;_purchase_note&lt;/li&gt;
+  &lt;li&gt;_default_attributes&lt;/li&gt;
+  &lt;li&gt;_virtual&lt;/li&gt;
+  &lt;li&gt;_downloadable&lt;/li&gt;
+  &lt;li&gt;_product_image_gallery&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;A questo punto, nella tabella &lt;code class=&quot;highlighter-rouge&quot;&gt;wp_posts&lt;/code&gt; abbiamo il nostro prodotto, a cui dobbiamo ancora aggiungere tutte le varie variazioni.&lt;/p&gt;
+
+&lt;h1 id=&quot;attributi&quot;&gt;Attributi&lt;/h1&gt;
+&lt;p class=&quot;notice&quot;&gt;&lt;strong&gt;Attenzione!&lt;/strong&gt; Prima di procedere devi creare gli attributi che andrai ad utilizzare (Dimensione, Colore, Taglia…).&lt;img src=&quot;http://apagiaro.it/assets/img/post-image/attr.png&quot; alt=&quot;addAttributesMenu&quot; /&gt; Lo slug deve essere quello usato poi nel file JSON di riferimento, nel caso in fondo all’articolo quindi “Dimensione” e “Colore”.&lt;/p&gt;
+
+&lt;p&gt;Per inserire gli attributi dei vari prodotti è un po’ complessa la cosa. O li inseriamo a mano nei vari prodotti e poi andiamo quindi a creare le variazioni nel database con gli attributi già creati, o dobbiamo andare a modificare il record con &lt;code class=&quot;highlighter-rouge&quot;&gt;meta_key = _product_attributes&lt;/code&gt; dentro la tabelle &lt;code class=&quot;highlighter-rouge&quot;&gt;wp_postmeta&lt;/code&gt; che somiglia a questo (che dopo un po’ di ricerche ho scoperto essere una serializzazione PHP):&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;a:2:{
+	s:10:&quot;dimensione&quot;;
+	a:6:{
+		s:4:&quot;name&quot;;
+		s:10:&quot;Dimensione&quot;;
+		s:5:&quot;value&quot;;
+		s:16:&quot;Grande | Piccolo&quot;;
+		s:8:&quot;position&quot;;
+		i:0;
+		s:10:&quot;is_visible&quot;;
+		i:1;
+		s:12:&quot;is_variation&quot;;
+		i:0;
+		s:11:&quot;is_taxonomy&quot;;
+		i:0;
+		}
+	s:6:&quot;colore&quot;;
+	a:6:{
+		s:4:&quot;name&quot;;
+		s:6:&quot;Colore&quot;;
+		s:5:&quot;value&quot;;
+		s:19:&quot;Rosso | Blu | Verde&quot;;
+		s:8:&quot;position&quot;;
+		i:1;
+		s:10:&quot;is_visible&quot;;
+		i:1;
+		s:12:&quot;is_variation&quot;;
+		i:0;
+		s:11:&quot;is_taxonomy&quot;;
+		i:0;
+		}
+	}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Usiamo quindi:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;unserialize('a:2:{s:10:&quot;dimensione&quot;;a:6:{s:4:&quot;name&quot;;s:10:&quot;Dimensione&quot;;s:5:&quot;value&quot;;s:16:&quot;Grande | Piccolo&quot;;s:8:&quot;position&quot;;i:0;s:10:&quot;is_visible&quot;;i:1;s:12:&quot;is_variation&quot;;i:0;s:11:&quot;is_taxonomy&quot;;i:0;}s:6:&quot;colore&quot;;a:6:{s:4:&quot;name&quot;;s:6:&quot;Colore&quot;;s:5:&quot;value&quot;;s:19:&quot;Rosso | Blu | Verde&quot;;s:8:&quot;position&quot;;i:1;s:10:&quot;is_visible&quot;;i:1;s:12:&quot;is_variation&quot;;i:0;s:11:&quot;is_taxonomy&quot;;i:0;}}');
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;e vediamo che quello che dobbiamo salvare nel database viene da un array fatto nel seguente modo:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;array(2) {
+  [&quot;dimensione&quot;]=&amp;gt;
+  array(6) {
+    [&quot;name&quot;]=&amp;gt;
+    string(10) &quot;Dimensione&quot;
+    [&quot;value&quot;]=&amp;gt;
+    string(16) &quot;Grande | Piccolo&quot;
+    [&quot;position&quot;]=&amp;gt;
+    int(0)
+    [&quot;is_visible&quot;]=&amp;gt;
+    int(1)
+    [&quot;is_variation&quot;]=&amp;gt;
+    int(0)
+    [&quot;is_taxonomy&quot;]=&amp;gt;
+    int(0)
+  }
+  [&quot;colore&quot;]=&amp;gt;
+  array(6) {
+    [&quot;name&quot;]=&amp;gt;
+    string(6) &quot;Colore&quot;
+    [&quot;value&quot;]=&amp;gt;
+    string(19) &quot;Rosso | Blu | Verde&quot;
+    [&quot;position&quot;]=&amp;gt;
+    int(1)
+    [&quot;is_visible&quot;]=&amp;gt;
+    int(1)
+    [&quot;is_variation&quot;]=&amp;gt;
+    int(0)
+    [&quot;is_taxonomy&quot;]=&amp;gt;
+    int(0)
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Possiamo quindi creare un array simile con gli attributi che ci servono, usare la funzione &lt;code class=&quot;highlighter-rouge&quot;&gt;serialize()&lt;/code&gt; e inserire il risultato nella tabella &lt;code class=&quot;highlighter-rouge&quot;&gt;wp_postmeta&lt;/code&gt; con&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;update_post_meta($post_id, &quot;_product_attributes&quot;, serialize($attributes_array))
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Un modo più carino è stato creato da &lt;a href=&quot;http://ryanknights.co.uk/insert-woocommerce-products-variations-programmatically/&quot;&gt;ryanknights&lt;/a&gt;. Prendendo quindi le informazioni dal file JSON e unendo il tutto ecco la funzione &lt;code class=&quot;highlighter-rouge&quot;&gt;insert_product_attributes()&lt;/code&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?php&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;insert_product_attributes&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$post_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$available_attributes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$variations&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;  
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;foreach&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$available_attributes&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$attribute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Go through each attribute
+&lt;/span&gt;    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;   
+        &lt;span class=&quot;nv&quot;&gt;$values&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Set up an array to store the current attributes values.
+&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;foreach&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$variations&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$variation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Loop each variation in the file
+&lt;/span&gt;        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;nv&quot;&gt;$attribute_keys&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;array_keys&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$variation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'attributes'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Get the keys for the current variations attributes
+&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;foreach&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$attribute_keys&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Loop through each key
+&lt;/span&gt;            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$key&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;===&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$attribute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// If this attributes key is the top level attribute add the value to the $values array
+&lt;/span&gt;                &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;nv&quot;&gt;$values&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$variation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'attributes'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;c1&quot;&gt;// Essentially we want to end up with something like this for each attribute:
+&lt;/span&gt;        &lt;span class=&quot;c1&quot;&gt;// $values would contain: array('small', 'medium', 'medium', 'large');
+&lt;/span&gt;
+        &lt;span class=&quot;nv&quot;&gt;$values&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;array_unique&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$values&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Filter out duplicate values
+&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;// Store the values to the attribute on the new post, for example without variables:
+&lt;/span&gt;        &lt;span class=&quot;c1&quot;&gt;// wp_set_object_terms(23, array('small', 'medium', 'large'), 'pa_size');
+&lt;/span&gt;        &lt;span class=&quot;nx&quot;&gt;wp_set_object_terms&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$post_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$values&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'pa_'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$attribute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;nv&quot;&gt;$product_attributes_data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Setup array to hold our product attributes data
+&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;foreach&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$available_attributes&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$attribute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Loop round each attribute
+&lt;/span&gt;    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nv&quot;&gt;$product_attributes_data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'pa_'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$attribute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Set this attributes array to a key to using the prefix 'pa'
+&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'name'&lt;/span&gt;         &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'pa_'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$attribute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'value'&lt;/span&gt;        &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'is_visible'&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'1'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'is_variation'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'1'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'is_taxonomy'&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'1'&lt;/span&gt;
+
+        &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+    &lt;span class=&quot;nx&quot;&gt;update_post_meta&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$post_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'_product_attributes'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$product_attributes_data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Attach the above array to the new posts meta data key '_product_attributes'
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;?&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h1 id=&quot;aggiungiamo-le-variazioni&quot;&gt;Aggiungiamo le variazioni&lt;/h1&gt;
+&lt;p&gt;Arrivati a questo punto abbiamo quindi un &lt;code class=&quot;highlighter-rouge&quot;&gt;$post_id&lt;/code&gt; corrispondente al prodotto in questione. E una array delle variazioni, magari qualcosa del genere:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[
+    {
+        &quot;attributes&quot;: {
+            &quot;Dimensione&quot;  : &quot;Grande&quot;,
+            &quot;Colore&quot; : &quot;Rosso&quot;
+        },
+        &quot;price&quot; : &quot;8.00&quot;
+    },
+    {
+        &quot;attributes&quot;: {
+            &quot;Dimensione&quot;  : &quot;Piccolo&quot;,
+            &quot;Colore&quot; : &quot;Verde&quot;
+        },
+        &quot;price&quot; : &quot;10.00&quot;
+    }
+    [...]
+]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;A questo punto non ci resta che inserire le variazioni effettivamente. Le variazioni non sono altro che post con tipo &lt;code class=&quot;highlighter-rouge&quot;&gt;product_variation&lt;/code&gt; e &lt;code class=&quot;highlighter-rouge&quot;&gt;post_parent&lt;/code&gt; il prodotto inserito prima, per capirci &lt;code class=&quot;highlighter-rouge&quot;&gt;$post_id&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?php&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;insert_product_variations&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$post_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$variations&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;  
+&lt;span class=&quot;cm&quot;&gt;/* Developed by http://ryanknights.co.uk/insert-woocommerce-products-variations-programmatically/ */&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;foreach&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$variations&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$index&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$variation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nv&quot;&gt;$variation_post&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Setup the post data for the variation
+&lt;/span&gt;            &lt;span class=&quot;s1&quot;&gt;'post_title'&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'Variation #'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$index&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;' of '&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$variations&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;' for product#'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$post_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'post_name'&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'product-'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$post_id&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'-variation-'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$index&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'post_status'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'publish'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'post_parent'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$post_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'post_type'&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'product_variation'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'guid'&lt;/span&gt;        &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;home_url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'/?product_variation=product-'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$post_id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'-variation-'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$index&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+        &lt;span class=&quot;nv&quot;&gt;$variation_post_id&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;wp_insert_post&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$variation_post&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Insert the variation
+&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;foreach&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$variation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'attributes'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$attribute&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Loop through the variations attributes
+&lt;/span&gt;        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;   
+            &lt;span class=&quot;nv&quot;&gt;$attribute_term&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;get_term_by&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'name'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'pa_'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$attribute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// We need to insert the slug not the name into the variation post meta
+&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;update_post_meta&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$variation_post_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'attribute_pa_'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$attribute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$attribute_term&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;slug&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+          &lt;span class=&quot;c1&quot;&gt;// Again without variables: update_post_meta(25, 'attribute_pa_size', 'small')
+&lt;/span&gt;        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+        &lt;span class=&quot;nx&quot;&gt;update_post_meta&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$variation_post_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'_price'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$variation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'price'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]);&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;update_post_meta&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$variation_post_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'_regular_price'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$variation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'price'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;?&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h1 id=&quot;come-far-funzionare-il-tutto&quot;&gt;Come far funzionare il tutto&lt;/h1&gt;
+&lt;p&gt;Arrivati a questo punto non ci resta che mettere insieme tutti i pezzi. Il problema ora è che abbiamo usato delle funzioni di Wordpress che dovranno essere eseguite, chiaramente, all’interno del framework di Wordpress. La cosa più semplice da fare è quella di creare un plugin che, una volta installato, esegua tutte queste funzioni e ci aggiorni il database.&lt;/p&gt;
+
+&lt;h2 id=&quot;creare-un-plugin&quot;&gt;Creare un plugin&lt;/h2&gt;
+&lt;p&gt;Andiamo a creare un nuovo file PHP, &lt;code class=&quot;highlighter-rouge&quot;&gt;myplugin.php&lt;/code&gt;, che, una volta attivato, eseguirà il nostro codice:&lt;/p&gt;
+
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?php&lt;/span&gt;
+   &lt;span class=&quot;cm&quot;&gt;/*
+   Plugin Name: WooCommerce Variable Product Test
+   Plugin URI: http://wordpress.org
+   Description: My Plugin
+   Version: 1.0
+   Author: Me
+   Author URI: http://wordpress.org
+   License: GPL2
+   */&lt;/span&gt;
+
+   &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;onActivation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(){&lt;/span&gt;
+     &lt;span class=&quot;c1&quot;&gt;// Inseriamo qui tutto il nostro codice che deve essere eseguito
+&lt;/span&gt;   &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+   &lt;span class=&quot;nx&quot;&gt;register_activation_hook&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;__FILE__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'onActivation'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;?&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;That’s all!
+Nice coding!&lt;/p&gt;
+
+&lt;p&gt;Complete plugin ready to run: &lt;a href=&quot;http://apagiaro.it/assets/plugin.zip&quot;&gt;download it&lt;/a&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;references&quot;&gt;References&lt;/h4&gt;
+&lt;p&gt;&lt;a href=&quot;http://ryanknights.co.uk/insert-woocommerce-products-variations-programmatically/&quot;&gt;ryanknights.co.uk&lt;/a&gt;&lt;/p&gt;</content><category term="Wordpress" /><category term="WooCommerce" /><category term="Hack" /><category term="Reverse Engineering" /><summary type="html">Una guida su come velocizzare l'inserimento dei prodotti su WooCommerce, con l'aiuto del PHP e delle API Wordpress</summary></entry><entry><title type="html">Raccolta di giochi multiplayer online (senza installazione)</title><link href="http://apagiaro.it/giochi-multiplayer-online/" rel="alternate" type="text/html" title="Raccolta di giochi multiplayer online (senza installazione)" /><published>2017-06-24T00:00:00+02:00</published><updated>2017-06-24T00:00:00+02:00</updated><id>http://apagiaro.it/giochi-multiplayer-online</id><content type="html" xml:base="http://apagiaro.it/giochi-multiplayer-online/">&lt;h1 id=&quot;lichess&quot;&gt;&lt;a href=&quot;http://en.lichess.org/&quot;&gt;Lichess&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&quot;http://apagiaro.it/assets/img/post-image/lichess.png&quot; alt=&quot;LiChess.org&quot; /&gt;
+Il più classico dei giochi: una partita a scacchi. Basta connettersi, creare una partita e mandare il link all’amico. Scacco matto!&lt;/p&gt;
+
+&lt;h1 id=&quot;battaglia-navale&quot;&gt;&lt;a href=&quot;http://it.battleship-game.org/&quot;&gt;Battaglia Navale&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&quot;http://apagiaro.it/assets/img/post-image/battleship.png&quot; alt=&quot;Battleship&quot; /&gt;
+Anche qui un gioco piuttosto classico. Connettiti al sito, seleziona avversario “familiar”, mandagli il link generatato e inizia la battaglia!&lt;/p&gt;
+
+&lt;h1 id=&quot;forza-quattro&quot;&gt;&lt;a href=&quot;https://www.playc4.com&quot;&gt;Forza Quattro&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&quot;http://apagiaro.it/assets/img/post-image/four.png&quot; alt=&quot;Playc4.com&quot; /&gt;
+Un sito un po’ più spartano dei precedenti ma con la stessa logica. Una volta aperto il sito, copiate il link dalla barra degli indirizzi, mandatelo ad un amico e iniziate la vostra sfida. Occhio alle diagonali!&lt;/p&gt;
+
+&lt;h1 id=&quot;curvytron&quot;&gt;&lt;a href=&quot;http://www.curvytron.com&quot;&gt;Curvytron&lt;/a&gt;&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&quot;http://apagiaro.it/assets/img/post-image/curvytron.png&quot; alt=&quot;curvytron.com&quot; /&gt;
+Un gioco che richiama il film “Tron”. Crea una stanza, fai entrare i tuoi amici ed inizia a giocare. Non tagliare le linee degli avversari per non perdere e taglia la loro strada prima che siano loro a tagliare la tua!&lt;/p&gt;
+
+&lt;p class=&quot;notice&quot;&gt;Se avete un ping eccessivamente alto e vi trovate nella stessa stanza, potete anche avviare il vostro server Curvytron in NodeJS. Se avete capito cosa ho detto potete scaricare tutto &lt;a href=&quot;https://github.com/Curvytron/curvytron&quot;&gt;da qui&lt;/a&gt; altrimenti fate come se non vi avessi detto nulla! :)&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Avete altri giochi da segnalare? Lasciate il link nei commenti!&lt;/strong&gt;&lt;/p&gt;</content><category term="giochi" /><category term="javascript" /><category term="multiplayer" /><summary type="html">Per giocare con i tuoi amici una partita veloce, senza dover installare niente sul pc.</summary></entry><entry><title type="html">Coding Challange</title><link href="http://apagiaro.it/codeChallange/" rel="alternate" type="text/html" title="Coding Challange" /><published>2017-06-24T00:00:00+02:00</published><updated>2017-06-24T00:00:00+02:00</updated><id>http://apagiaro.it/codeChallange</id><content type="html" xml:base="http://apagiaro.it/codeChallange/">&lt;p&gt;Ho trovato su Youtube &lt;a href=&quot;https://www.youtube.com/channel/UCvjgXvBlbQiydffZU7m1_aw&quot;&gt;questo&lt;/a&gt; simpatico tipo che fa dei video sulla programmazione grafica ad eventi in Javascript davvero interessanti. Eccone un’esempio:&lt;/p&gt;
+&lt;iframe width=&quot;560&quot; height=&quot;315&quot; src=&quot;https://www.youtube.com/embed/AaGK-fj-BAM&quot; frameborder=&quot;0&quot; allowfullscreen=&quot;&quot;&gt;&lt;/iframe&gt;
+
+&lt;p&gt;Nel suo canale ne trovate a decine di video così. Buona visione!&lt;/p&gt;</content><category term="javascript" /><category term="snake" /><summary type="html">Per informatici annoiati...</summary></entry><entry><title type="html">Guida alla costruzione di un ripetitore WiFi fai-da-te</title><link href="http://apagiaro.it/ripetitoreWifiDIY/" rel="alternate" type="text/html" title="Guida alla costruzione di un ripetitore WiFi fai-da-te" /><published>2017-04-20T00:00:00+02:00</published><updated>2017-04-20T00:00:00+02:00</updated><id>http://apagiaro.it/ripetitoreWifiDIY</id><content type="html" xml:base="http://apagiaro.it/ripetitoreWifiDIY/">&lt;p&gt;Vediamo oggi come realizzare un ripetitore WiFi a bassissimo costo, con un poco di ingegno e manualità.&lt;/p&gt;
+
+&lt;h1 id=&quot;componenti-e-circuito&quot;&gt;Componenti e circuito&lt;/h1&gt;
+&lt;p&gt;Per questo progetto useremo
+	- &lt;a href=&quot;https://it.aliexpress.com/item/ESP8266-Serial-WIFI-Wireless-Module-Wireless-Transceiver-The-Internet-of-Things/32220713885.html?ws_ab_test=searchweb0_0,searchweb201602_2_10152_10065_10151_10068_10084_10083_10080_10082_10081_10177_10110_10136_10137_10111_10060_10138_10112_10113_10155_10062_10114_10156_10154_10056_10055_10054_10059_10099_10078_10079_10103_10073_10102_10096_10070_10148_10123_10147_10052_10053_10124_10142_10107_10050_10143_10051,searchweb201603_9,afswitch_1,ppcSwitch_4&amp;amp;btsid=aa9e5f6f-a5a8-43c3-9be0-2db34901e1ee&amp;amp;algo_expid=48192ddc-1ccd-4e63-9ec6-121a3f900737-0&amp;amp;algo_pvid=48192ddc-1ccd-4e63-9ec6-121a3f900737&quot;&gt;Modulo WiFi ESP-01&lt;/a&gt;, con microcontrollore ESP8266 - 1,70€
+	- &lt;a href=&quot;https://www.amazon.it/s/ref=nb_sb_noss_2?__mk_it_IT=ÅMÅŽÕÑ&amp;amp;url=search-alias%3Daps&amp;amp;field-keywords=scheda+millefori&quot;&gt;Scheda millefori&lt;/a&gt;, 1€ al negozio di elettronica sotto casa
+	- Altri componenti minori (1,5€)
+		- Un condensatore
+		- 1 Resistenza 3.3KOhm
+		- 1 Resistenza 5.6KOhm
+		- 10 Pin Header
+		- 1 LM317T
+	- &lt;a href=&quot;http://www.ebay.it/itm/6Pin-USB-2-0-to-TTL-UART-Module-Serial-Converter-CP2102-STC-Replace-FT232-/122146759977?hash=item1c7083a529:g:uVoAAOSwPCVX47b1&quot;&gt;Connettore USB-SerialPin&lt;/a&gt;, 3€ su eBay (vi servirà solo all’inizio, potete farvela prestare)&lt;/p&gt;
+
+&lt;h1 id=&quot;costruiamo-il-circuito&quot;&gt;Costruiamo il circuito&lt;/h1&gt;
+&lt;p&gt;Per iniziare dobbiamo costruire il circuito per far funzionare il tutto. Lo schema è il seguente (è lo stesso usato nel &lt;a href=&quot;http://apagiaro.it/meshweather/&quot;&gt;progetto della rete mesh&lt;/a&gt;):
+&lt;img src=&quot;http://apagiaro.it/assets/img/post-image/usage-scheme.png&quot; alt=&quot;Usage Scheme&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Per come disporre questi pochi componenti lascio il tutto alla vostra fantasia. Questo circuito alimenterà il nostro modulo ESP-01 con una batteria da 9V o, eventualmente, una &lt;a href=&quot;http://www.ebay.it/itm/122195969727?_trksid=p2060353.m2749.l2649&amp;amp;ssPageName=STRK%3AMEBIDX%3AIT&quot;&gt;serie di batteria AA&lt;/a&gt;. Inoltre, quello che non si capisce dallo schema, sono i collegamenti dei pin del modulo che sono i seguenti:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Pin&lt;/th&gt;
+      &lt;th&gt;Attacco&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;VCC&lt;/td&gt;
+      &lt;td&gt;3.3V&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;RST&lt;/td&gt;
+      &lt;td&gt;non collegato&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;CH_PD&lt;/td&gt;
+      &lt;td&gt;3.3V&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;TXD&lt;/td&gt;
+      &lt;td&gt;non collegato&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;RXD&lt;/td&gt;
+      &lt;td&gt;non collegato&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;GPIO&lt;/td&gt;
+      &lt;td&gt;3.3V&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;GPIO2&lt;/td&gt;
+      &lt;td&gt;non collegato&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;GND&lt;/td&gt;
+      &lt;td&gt;GND&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://apagiaro.it/assets/img/post-image/pinesp.jpg&quot; alt=&quot;esp Pin&quot; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;software&quot;&gt;Software&lt;/h1&gt;
+&lt;p&gt;Per quanto riguarda il software qui la questione si fa più insidiosa perchè tocca smanettarci un po’ di più. La libreria che ho usato è &lt;a href=&quot;https://github.com/martin-ger/esp_wifi_repeater&quot;&gt;eps_wifi_repeater&lt;/a&gt;, disponibile su GitHub.&lt;/p&gt;
+
+&lt;p&gt;Per compilare e flashare il tutto trovate la guida direttamente sulla repo, noi ci limiteremo a flashare il tutto prestando attenzione al fatto che stiamo usando un ESP-01.&lt;/p&gt;
+
+&lt;p&gt;La prima cosa da fare sarà installare esptool, un programma che ci permette di flashare il nostro cosino con un semplice comando. 
+Per scaricare esptool scrivete quindi:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;git clone https://github.com/themadinventor/esptool.git
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;oppure potete procedere all’installazione tramite &lt;code class=&quot;highlighter-rouge&quot;&gt;pip&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;pip install --upgrade esptool
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Connettiamo il nostro ESP-01 al nostro pc utilizzando il &lt;a href=&quot;http://www.ebay.it/itm/6Pin-USB-2-0-to-TTL-UART-Module-Serial-Converter-CP2102-STC-Replace-FT232-/122146759977?hash=item1c7083a529:g:uVoAAOSwPCVX47b1&quot;&gt;connettore seriale-usb&lt;/a&gt; con questa connessione di pin:
+&lt;img src=&quot;http://apagiaro.it/assets/img/post-image/devSerial.png&quot; alt=&quot;debuggerMode pin&quot; /&gt;
+A questo punto scarichiamo la libreria per il wifi-repeater&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;git clone https://github.com/martin-ger/esp_wifi_repeater.git
+cd esp_wifi_repeater
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;e flashamola direttamente sull’ESP-01 con il seguente comando:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;esptool --port /dev/ttyUSB0 write_flash -fs 8m 0x00000 firmware/0x00000.bin 0x10000 firmware/0x10000.bin
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Per qualche motivo su alcuni moduli non funziona, in tal caso flashamo la versione compilata con le SDK precedenti, eseguendo il comando&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;esptool --port /dev/ttyUSB0 write_flash -fs 8m 0x00000 firmware_sdk_1.5.4/0x00000.bin 0x40000 firmware_sdk_1.5.4/0x40000.bin
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h1 id=&quot;lets-start&quot;&gt;Let’s start&lt;/h1&gt;
+&lt;p&gt;A questo punto abbiamo finito, attacchiamo l’ESP-01 al circuito, alimentato tramite la nostra batteria. Accendiamo il pc, connettiamoci alla rete myAP e, con connettendoci tramite telnet andiamo a settare i nostri parametri.&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;telnet 192.168.4.1 7777
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;Si aprirà una console del chip, inseriamo i seguenti comand1&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;set ap_open 0
+set ssid NOME_DEL_TUO_WIFI_ATTUALE
+set password PASSWORD_DEL_TUO_WIFI_ATTUALE
+set ap_ssid NOME_NUOVA_RETE
+set ap_password PASSWORD_NUOVA_RETE
+save
+show config
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;A questo punto abbiamo il nostro ripetitore. Certo, non sarà velocissimo, ma è veloce quel tanto che basta per una navigazione ordinaria senza dover fare streaming o cose grandi trasferimenti di file.&lt;/p&gt;</content><category term="ESP8266" /><category term="Elettronica" /><category term="Arduino" /><summary type="html">Con una spesa di pochi euro...</summary></entry><entry><title type="html">Reveal.js, guida all’utilizzo</title><link href="http://apagiaro.it/revealjs/" rel="alternate" type="text/html" title="Reveal.js, guida all'utilizzo" /><published>2017-04-14T00:00:00+02:00</published><updated>2017-04-14T00:00:00+02:00</updated><id>http://apagiaro.it/revealjs</id><content type="html" xml:base="http://apagiaro.it/revealjs/">&lt;p&gt;L’altro giorno, cercando un modo di creare una presentazione per il &lt;a href=&quot;http://apagiaro.it/meshweather&quot;&gt;mio ultimo progetto&lt;/a&gt; mi sono imbattuto un framework completo e di semplice utilizzo. Un esempio di cosa si può fare con questo gioiellino in soli 5 minuti è questo:&lt;/p&gt;
+&lt;iframe src=&quot;http://apagiaro.it/mesh&quot; height=&quot;450px&quot; width=&quot;700px&quot;&gt;&lt;/iframe&gt;
+
+&lt;h2 id=&quot;lets-start&quot;&gt;Let’s start&lt;/h2&gt;
+&lt;p&gt;Per iniziare ci basterà scaricare il codice del framework dalla &lt;a href=&quot;https://github.com/hakimel/reveal.js&quot;&gt;sua pagina GitHub&lt;/a&gt;. A questo punto possiamo iniziare subito modificando la pagina &lt;code class=&quot;highlighter-rouge&quot;&gt;index.html&lt;/code&gt; o creando la nostra nuova pagina fatta che dovrà includere nell’&lt;code class=&quot;highlighter-rouge&quot;&gt;head&lt;/code&gt; le seguenti dichiarazioni:&lt;/p&gt;
+&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;link&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;rel=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;stylesheet&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;css/reveal.css&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;link&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;rel=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;stylesheet&quot;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;href=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;css/theme/moon.css&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;e in fondo alla pagina, prima della chiusura del &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;/body&amp;gt;&lt;/code&gt;, bisognerà aggiungere del codice Javascript per il caricamento del framework:&lt;/p&gt;
+&lt;div class=&quot;language-javascript highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;script&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;src&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;lib/js/head.min.js&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;/script&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;
+&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;script&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;src&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;js/reveal.js&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;/script&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;
+&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;script&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;c1&quot;&gt;// More info https://github.com/hakimel/reveal.js#configuration&lt;/span&gt;
+	&lt;span class=&quot;nx&quot;&gt;Reveal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;initialize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+		&lt;span class=&quot;na&quot;&gt;history&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+
+		&lt;span class=&quot;c1&quot;&gt;// More info https://github.com/hakimel/reveal.js#dependencies&lt;/span&gt;
+		&lt;span class=&quot;na&quot;&gt;dependencies&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+			&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;src&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'plugin/markdown/marked.js'&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+			&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;src&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'plugin/markdown/markdown.js'&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+			&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;src&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'plugin/notes/notes.js'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;async&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+			&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;src&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'plugin/highlight/highlight.js'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;async&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;callback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;hljs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;initHighlightingOnLoad&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+		&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;/script&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;&amp;gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;dove le dependencies possono essere modificate a vostro piacimento. Le configazioni applicabili sono tantissime e avremo modo più avanti di parlarne.&lt;/p&gt;
+
+&lt;h3 id=&quot;creare-le-slides&quot;&gt;Creare le slides&lt;/h3&gt;
+&lt;p&gt;Fatto questo non dobbiamo far altro che iniziare a scrivere la nostra presentazione. Ogni slide non è altro che una pagina HTML racchiusa tra i tag &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;section&amp;gt;&lt;/code&gt;. Tutte le &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;section&amp;gt;&lt;/code&gt; vanno aggiunte tra i seguenti div&lt;/p&gt;
+&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;reveal&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;div&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;slides&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+	...
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/div&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;La particolarità di questo framework è la possibilità di aggiungere sia uno scorrimento orizzontale, utilizzato, di solito, per rappresentare il cambio di macroargomento, sia uno scorrimento verticale che è più simile ad uno scorrimento classico di slides. Per aggiungere quindi uno scorrimento verticale basterà aggiungere &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;section&amp;gt;&lt;/code&gt; annidate. Un codice come&lt;/p&gt;
+&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;section&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;section&amp;gt;&lt;/span&gt;
+		Slide 1.1
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;/section&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;section&amp;gt;&lt;/span&gt;
+		Slide 1.2
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;/section&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/section&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;section&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;section&amp;gt;&lt;/span&gt;
+		Slide 2.1
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;/section&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;section&amp;gt;&lt;/span&gt;
+		Slide 2.2
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;/section&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/section&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;produrrà il seguente risultato:&lt;/p&gt;
+&lt;iframe src=&quot;http://apagiaro.it/mesh/esempio1.html&quot; height=&quot;450px&quot; width=&quot;700px&quot;&gt;&lt;/iframe&gt;
+
+&lt;h3 id=&quot;frammenti&quot;&gt;Frammenti&lt;/h3&gt;
+&lt;p&gt;Per far apparire i punti di un’elenco uno alla volta alla pressione del tasto avanti o mostrare una didascalia dopo un’immagine è una cosa che si può fare senza fatica. Basta aggiungere, all’oggetto che vogliamo mostrare dopo, la classe &lt;code class=&quot;highlighter-rouge&quot;&gt;fragment&lt;/code&gt;. Un esempio è il seguente codice:&lt;/p&gt;
+&lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;section&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;ul&amp;gt;&lt;/span&gt;
+		&lt;span class=&quot;nt&quot;&gt;&amp;lt;li&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;fragment&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt; Punto 1 &lt;span class=&quot;nt&quot;&gt;&amp;lt;/li&amp;gt;&lt;/span&gt;
+		&lt;span class=&quot;nt&quot;&gt;&amp;lt;li&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;fragment&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt; Punto 2 &lt;span class=&quot;nt&quot;&gt;&amp;lt;/li&amp;gt;&lt;/span&gt;
+		&lt;span class=&quot;nt&quot;&gt;&amp;lt;li&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;fragment&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt; Punto 3 &lt;span class=&quot;nt&quot;&gt;&amp;lt;/li&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;/ul&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/section&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;section&amp;gt;&lt;/span&gt;
+	Applicare diversi stili ai fragment...
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;ul&amp;gt;&lt;/span&gt;
+		&lt;span class=&quot;nt&quot;&gt;&amp;lt;li&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;fragment grow&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt; class=&quot;fragment grow&quot; &lt;span class=&quot;nt&quot;&gt;&amp;lt;/li&amp;gt;&lt;/span&gt;
+		&lt;span class=&quot;nt&quot;&gt;&amp;lt;li&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;fragment shrink&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt; class=&quot;fragment shrink&quot; &lt;span class=&quot;nt&quot;&gt;&amp;lt;/li&amp;gt;&lt;/span&gt;
+		&lt;span class=&quot;nt&quot;&gt;&amp;lt;li&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;fragment fade-out&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt; class=&quot;fragment fade-out&quot; &lt;span class=&quot;nt&quot;&gt;&amp;lt;/li&amp;gt;&lt;/span&gt;
+		&lt;span class=&quot;nt&quot;&gt;&amp;lt;li&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;class=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;fragment fade-up highlight-red&quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt; class=&quot;fragment fade-out highlight-red&quot; &lt;span class=&quot;nt&quot;&gt;&amp;lt;/li&amp;gt;&lt;/span&gt;
+	&lt;span class=&quot;nt&quot;&gt;&amp;lt;/ul&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;&amp;lt;/section&amp;gt;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;p&gt;che produce il seguente risultato&lt;/p&gt;
+&lt;iframe src=&quot;http://apagiaro.it/mesh/esempio2.html&quot; height=&quot;450px&quot; width=&quot;700px&quot;&gt;&lt;/iframe&gt;
+
+&lt;h2 id=&quot;temi&quot;&gt;Temi&lt;/h2&gt;
+&lt;p&gt;Questo framework contiene anche numerosi temi che possono essere applicati semplicemente cambiato il css importanto nell’header della pagina. A &lt;a href=&quot;http://apagiaro.it/mesh/theme_example.html&quot;&gt;questa pagina&lt;/a&gt; potete trovare un’anteprima dei temi disponibili nella repository del framework su GitHub.&lt;/p&gt;</content><category term="javascript" /><category term="HTML5" /><summary type="html">Un framework per le presentazioni in HTML</summary></entry><entry><title type="html">meshWeather</title><link href="http://apagiaro.it/meshweather/" rel="alternate" type="text/html" title="meshWeather" /><published>2017-04-14T00:00:00+02:00</published><updated>2017-04-14T00:00:00+02:00</updated><id>http://apagiaro.it/meshweather</id><content type="html" xml:base="http://apagiaro.it/meshweather/">&lt;p&gt;L’idea di questo progetto è la realizzazione di una rete mesh con i circuiti ESP-01. Il network viene poi impiegato per il monitoraggio delle condizione metereologiche in un campo tramite l’utilizzo di stazioni meteo basate su Arduino, ma l’idea si può estendere facilmente con altri utilizzi sostituendo semplicemente i dati raccolti dalle stazioni.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://apagiaro.it/assets/img/post-image/esempio.png&quot; style=&quot;width: 450px !important;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;hardware&quot;&gt;Hardware&lt;/h2&gt;
+&lt;p&gt;&lt;img src=&quot;http://apagiaro.it/assets/img/post-image/ESP-01.jpg&quot; align=&quot;left&quot; /&gt;
+Il progetto è realizzato impiegando tutto hardware a bassissimo costo. Per la rete mesh sono stati impiegati i chip ESP-01 che utilizzano il microcontrollare ESP8266 prodotto dalle EspressIF.&lt;/p&gt;
+
+&lt;p&gt;Questo modulo viene, di solito, venduto con il firmware AT preinstallato. Seguendo tuttavia semplici guide online, come ad esempio &lt;a href=&quot;https://h3ron.com/post/programmare-lesp8266-ovvero-arduino-con-il-wifi-a-meno-di-2/&quot;&gt;questa&lt;/a&gt; è possibile flashare il firmware nodeMCU e scrivere il proprio sketch.&lt;/p&gt;
+
+&lt;h2 id=&quot;costruire-la-rete-mesh&quot;&gt;Costruire la rete mesh&lt;/h2&gt;
+&lt;p&gt;Capito come si fa a caricare il proprio firmware e sketch, abbiamo cercato una libreria che potesse aiutarci trovando &lt;a href=&quot;https://github.com/Coopdis/easyMesh&quot;&gt;easyMesh&lt;/a&gt;, sulla quale stiamo scrivendo il nostro protocollo di comunicazione.&lt;/p&gt;
+
+&lt;p&gt;Poichè la rete che andiamo a costruire è statica, cioè i nodi non sono mobili, abbiamo scritto un protocollo di rete ispirato al distance vector che si preoccupa di cercare la strada migliore dalla stazione meteo che emette di dati al server che li analizza. I nodi intermedi si fanno carico di gestire l’instradamento e, in caso di fallimento, di rispedire il pacchetto arrivato fino a loro senza propagare l’errore all’indietro.&lt;/p&gt;
+
+&lt;h2 id=&quot;il-circuito-per-far-funzionare-il-tutto&quot;&gt;Il circuito per far funzionare il tutto&lt;/h2&gt;
+&lt;p&gt;Per flashare i firmware è stato progettato un circuito che permette di passare dalla modalita bootloading ad una usage, la cui differenza è l’attacco di un pin del debugger seriale.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://apagiaro.it/assets/img/post-image/devSerial.png&quot; alt=&quot;&quot; /&gt;
+&lt;em&gt;Modalità debugging&lt;/em&gt;
+&lt;img src=&quot;http://apagiaro.it/assets/img/post-image/usageSerial.png&quot; alt=&quot;&quot; /&gt;
+&lt;em&gt;Modalità usage&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Il circuito che permette tutto questo potete trovarlo sulla repository di Friting &lt;a href=&quot;http://fritzing.org/projects/esp01-development-board&quot;&gt;qui&lt;/a&gt;, caricato dall’utente mastroGeppetto.&lt;/p&gt;
+
+&lt;p&gt;Il circuito semplificato per il solo utilizzo, pensato per un’utilizzo tramite batteria, potete trovarlo &lt;a href=&quot;http://apagiaro.it/assets/only-usage.fzz&quot;&gt;qui&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;presentazione-del-progetto&quot;&gt;Presentazione del progetto&lt;/h2&gt;
+&lt;iframe src=&quot;http://apagiaro.it/mesh&quot; height=&quot;450px&quot; width=&quot;700px&quot;&gt;&lt;/iframe&gt;
+
+&lt;h1 id=&quot;altre-idee&quot;&gt;Altre idee&lt;/h1&gt;
+&lt;p&gt;Cercando soluzioni per questo progetto mi sono imbattuto in un progetto per la realizzazione di un Wifi-Extender con questo modulo da 2€. Potete approfondire il progetto &lt;a href=&quot;http://apagiaro.it/ripetitoreWifiDIY/&quot;&gt;sulla pagina&lt;/a&gt; in cui ne parlo in maniera più specifica.&lt;/p&gt;</content><category term="ESP8266" /><category term="Arduino" /><category term="Elettronica" /><summary type="html">Un sistema decentralizzato per il monitoraggio del meteo</summary></entry><entry><title type="html">Yeelight macOS App</title><link href="http://apagiaro.it/yeelight/" rel="alternate" type="text/html" title="Yeelight macOS App" /><published>2016-07-02T00:00:00+02:00</published><updated>2016-07-02T00:00:00+02:00</updated><id>http://apagiaro.it/yeelight</id><content type="html" xml:base="http://apagiaro.it/yeelight/">&lt;p&gt;La sera sempre lo stesso problema. Ci si sdraia a letto e tac, ti accorgi che la luce è rimasta accesa. Individuato il problema, ecco la soluzione: una smart bulb!&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://image.ibb.co/iZ8Wfa/Schermata_2017_04_07_alle_12_40_15.png&quot; alt=&quot;Smart Bulb inside&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Oramai queste lampadine si trovano di tutti i generi e prodotte anche dall’ultimo dei produttori cinesi. Giravo su un blog ed ecco che avevo trovato l’offerta per quella prodotta da Xiaomi, la Yeelight RGBW, una lamapdina che, oltre a poter essere controllata da smartphone, permette anche di scegliere il colore della luce e regolarne la luminosità.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://image.ibb.co/czTxLa/Schermata_2017_04_07_alle_12_40_23.png&quot; alt=&quot;Xiaomi Yeelight&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Però ecco, il cellulare non sempre è comodo, a volte guardi un film da pc e il cellulare l’ho già messo in modalità aereo per la notte. E così, anche qui, individuato il problema, trovata la soluzione. La Yeelight espone, dopo aver attivato la modalità sviluppatore, un’&lt;a href=&quot;http://www.yeelight.com/download/Yeelight_Inter-Operation_Spec.pdf&quot;&gt;interfaccia&lt;/a&gt; per controllarla tramite semplici chiamate HTTP.
+Ho così iniziato a sviluppare l’applicazione per la gestione della lampadina da PC. L’applicazione è alquanto in stato iniziale, forse troverò più avanti il tempo di sistemarla per evitare, ad esempio, che ci sia compilato all’interno l’indirizzo IP statico della lampadina introducendo, invece, un costruttore della classe Yeelight che faccia una discovery nella rete delle lampadine disponibili.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://image.ibb.co/jHHwDv/preview.png&quot; alt=&quot;Yeelight Application&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Al momento, il codice finora sviluppato, è disponibile su &lt;a href=&quot;https://github.com/alessandro308/YeelightController&quot;&gt;GitHub&lt;/a&gt;.&lt;/p&gt;</content><category term="yeelight" /><category term="swift" /><category term="macos" /><category term="Cocoa" /><summary type="html">Perchè quando uno è pigro, lo è sempre...</summary></entry><entry><title type="html">MathLabyrinth</title><link href="http://apagiaro.it/math-labyrinth/" rel="alternate" type="text/html" title="MathLabyrinth" /><published>2016-07-02T00:00:00+02:00</published><updated>2016-07-02T00:00:00+02:00</updated><id>http://apagiaro.it/math-labyrinth</id><content type="html" xml:base="http://apagiaro.it/math-labyrinth/">&lt;p&gt;Questo giochino nasce come progetto dell’esame di Interazione Uomo-Macchina della Laurea Triennale. Lo scopo era sviluppare interfaccia grafica facilmente gestibile per un’applicazione a scelta in un linguaggio a scelta.&lt;/p&gt;
+
+&lt;p&gt;Il framework usato è Cocoa, scelto dalla volontà di sviluppare qualcosa con questo per iniziare a testarne i componenti e acquistire competenze nel suo utilizzo.&lt;/p&gt;
+
+&lt;p&gt;Lo scopo del gioco è quello di dover fuggire dai labirinti creati risolvendo delle operazioni matematiche per fare in modo che le condizioni di vincolo poste tra il giocatore e l’uscita siano rispettate.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://apagiaro.it/assets/img/post-image/mathlabyrinth/1.png&quot; alt=&quot;Menù Principale&quot; /&gt;
+&lt;img src=&quot;http://apagiaro.it/assets/img/post-image/mathlabyrinth/2.png&quot; alt=&quot;Livello d'esempio&quot; /&gt;&lt;/p&gt;</content><category term="università" /><category term="swift" /><category term="macos" /><category term="Cocoa" /><summary type="html">Un gioco per macOS per allenare la mente risolvendo un labirinto</summary></entry></feed>
