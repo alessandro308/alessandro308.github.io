@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <title>CALCOLO SEMPLIFICATO DELLA POTENZA TERMICA</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script> 
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+</head>
+<body>
+
+<div class="custom-bg">
+  <div class="container" ng-app="myApp" ng-controller="tableCtrl">
+    <h2>CALCOLO SEMPLIFICATO DELLA POTENZA TERMICA</h2>
+    <p>NORME ASRAHE 62-1989:</p>
+
+    <table class="table table-inverse">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Descrizione</th>
+          <th>Valore</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">1</th>
+          <td><label for="ricambioaria">Ricambio Aria Orario Consigliato: </label></td>
+          <td><input type="text" ng-model="ricambiodariaorario"/></td>
+        </tr>
+        <tr>
+          <th scope="row">2</th>
+          <td><label for="riscaldamento">In riscaldamento: </label></td>
+          <td><input type="text" ng-model="Inriscaldamento" /></td>
+        </tr>
+        <tr>
+          <th scope="row">3</th>
+          <td><label for="riscaldamento">Differenza Termica Interno-Esterno: </label></td>
+          <td><input type="text" ng-model="differenzatermica" /></td>
+        </tr>
+        <tr>
+          <th scope="row">4</th>
+          <td><label for="riscaldamento">Resa Termica radiatore di: </label></td>
+          <td><input type="text" ng-model="resatermica" /></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Locale</th>
+          <th>Superfice</th>
+          <th>Altezza</th>
+          <th>Volume</th>
+          <th>Aria di ric.</th>
+          <th>Pot. Risc</th>
+          <th>Pot.Tot. (Kcal/h)</th>
+          <th>N. colonnine (per locale)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="(key, value) in rows">
+          <td><input class="input-number" type="text" ng-model="id" ng-value="0" /></td>
+          <td><input class="input-number" type="text" ng-model="value.area" ng-change="updateRow($index)"/>mq</td>
+          <td><input class="input-number" type="text" ng-model="value.height" ng-change="updateRow($index)"/>ml</td>
+          <td>{{value.volume}} mc</td>
+          <td>{{value.volume*ricambiodariaorario}} mc/h</td>
+          <td>{{value.volume*Inriscaldamento}} Kcal/h</td>
+          <td>{{(0.3*value.volume*ricambiodariaorario*differenzatermica)+value.volume*Inriscaldamento}}</td>
+          <td >
+            {{ ((0.3*value.volume*ricambiodariaorario*differenzatermica)+value.volume*Inriscaldamento)/resatermica * 1.1 }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <button ng-click="addRow()">Aggiungi riga</button>
+    <br/>
+    <div class="end-button">
+      <button class="btn btn-success"> Salva nel mio account </button>
+      <button class="btn btn-danger"> Pulisci tutti i campi </button>
+    </div>
+  </div>
+</div>
+</body>
+
+<script type="text/javascript">
+   var app = angular.module('myApp', []);
+  app.controller('tableCtrl', function($scope) {
+      $scope.ricambiodariaorario = 0;
+      $scope.Inriscaldamento = 0;
+      $scope.differenzatermica = 0;
+      $scope.resatermica = 0;
+      $scope.rows = {
+                      0:{volume: 0}
+                    };
+      $scope.updateRow = function (i){
+        var vol = $scope.rows[i].area*$scope.rows[i].height;
+        if(!isNaN(vol)){
+          $scope.rows[i].volume = vol
+        }
+
+      }
+      $scope.addRow = function(){
+        $scope.rows[Object.keys($scope.rows).length] = {volume: 0};
+      }
+  });
+</script>
+
+</html>

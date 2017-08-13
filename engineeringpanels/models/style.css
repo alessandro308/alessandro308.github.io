@@ -1,0 +1,35 @@
+body{
+  background: url("img/bg-pattern.png"), #7b4397;
+  background: url("img/bg-pattern.png"), -webkit-linear-gradient(to left, #7b4397, #dc2430);
+  background: url("img/bg-pattern.png"), linear-gradient(to left, #7b4397, #dc2430);
+}
+.container{
+	background-color: #ffffff; 
+	top: 30px; 
+	padding: 20px; 
+	border-radius: 15px;
+}
+.table{
+	border-radius: 15px;
+}
+textarea:focus, input:focus{
+    outline: none;
+}
+input{
+	background: transparent;
+    border: none;
+    border-bottom: 1px dashed #83A4C5;
+}
+
+.table-inverse input{
+	color: #ffffff;
+}
+.input-number{
+	width: 40px;
+}
+.end-button{
+	float: right; 
+	background-color: #ffffff;
+	border-radius: 15px;
+	padding: 10px;
+}
