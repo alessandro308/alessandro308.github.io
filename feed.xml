@@ -1,4 +1,96 @@
-<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xml" href="http://apagiaro.it/feed.xslt.xml"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.2.1">Jekyll</generator><link href="http://apagiaro.it/feed.xml" rel="self" type="application/atom+xml" /><link href="http://apagiaro.it/" rel="alternate" type="text/html" /><updated>2017-08-21T13:45:47+02:00</updated><id>http://apagiaro.it/</id><title type="html">Alessandro Pagiaro</title><subtitle>Studente di Informatica presso l'Università di Pisa. Scout a tempo perso.</subtitle><entry><title type="html">Come aggiungere a WooCommerce articoli con variazione via codice (programmatically)</title><link href="http://apagiaro.it/variable-product-programmatically/" rel="alternate" type="text/html" title="Come aggiungere a WooCommerce articoli con variazione via codice (programmatically)" /><published>2017-06-27T00:00:00+02:00</published><updated>2017-06-27T00:00:00+02:00</updated><id>http://apagiaro.it/variable-product-programmatically</id><content type="html" xml:base="http://apagiaro.it/variable-product-programmatically/">&lt;p&gt;&lt;img src=&quot;http://apagiaro.it/assets/img/post-image/woocommerce.png&quot; style=&quot;float:left; margin: 15px;&quot; /&gt;Woocommerce è il più famoso plugin di Wordpress per la realizzazione di siti eCommerce. I suoi punti di forza sono tantissimi tra i quali la personalizzazione estrame dei prodotti. Il problema che però spesso si incontra è come caricare in maniera efficiente le decine e decine di prodotti senza perderci le giornate intere?&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xml" href="http://apagiaro.it/feed.xslt.xml"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.2.1">Jekyll</generator><link href="http://apagiaro.it/feed.xml" rel="self" type="application/atom+xml" /><link href="http://apagiaro.it/" rel="alternate" type="text/html" /><updated>2017-08-21T15:37:57+02:00</updated><id>http://apagiaro.it/</id><title type="html">Alessandro Pagiaro</title><subtitle>Studente di Informatica presso l'Università di Pisa. Scout a tempo perso.</subtitle><entry><title type="html">La crittografia moderna spiegata a mia mamma</title><link href="http://apagiaro.it/intro-crittografia/" rel="alternate" type="text/html" title="La crittografia moderna spiegata a mia mamma" /><published>2017-08-21T00:00:00+02:00</published><updated>2017-08-21T00:00:00+02:00</updated><id>http://apagiaro.it/intro-crittografia</id><content type="html" xml:base="http://apagiaro.it/intro-crittografia/">&lt;p&gt;Da sempre l’uomo cerca modi per nascondere i propri messaggi. Erodoto narra che nell’antica Persia i messaggi venivano scritti sulla testa degli schiavi, si attendeva che i capelli crescessero e venivano mandati come messaggeri. 
+Ad oggi, con l’introduzione dei computer siamo in grado chiaramente di usare metodi più veloci e sofisticati che spesso risultano come un’enorme magia agli occhi dei meno tecnici. Lo scopo di questa pagina è quindi quella di fornire l’idea di base delle nuove tecniche senza entrare nel dettaglio, un po’ come un mago che rivela i suoi trucchi, fornendo in caso riferimenti più specifici e tecnici per approfondire. Troverete in fondo alla pagina un piccolo glossario con i termini che noi informatici amiamo usare ma che spesso non sono chiari a chi non è dell’ambiente.&lt;/p&gt;
+
+&lt;p&gt;Iniziamo subito nel dire che esistono due tipi di &lt;a href=&quot;#glossario&quot;&gt;algoritmi&lt;/a&gt; crittografici, quelli simmetrici e quelli asimmetrici.
+Quelli simmetrici sono quelli che solitamente ti immagini quando pensi ad un modo per cifrare e decifrare qualcosa. All’asilo scrivevi le parole al contrario, quello era una algoritmo simmetrico perchè per decifrare il tutto dovevi… beh, dovevi semplicemente leggere le parole al contrario. L’idea, nel caso simmetrico, è quello che la &lt;a href=&quot;#glossario&quot;&gt;chiave&lt;/a&gt; di cifratura è la stessa di decifratura.&lt;/p&gt;
+
+&lt;p&gt;Un esempio di cifrario simmetrico piuttosto semplice è quello di Cesare dove ogni lettera viene sostituita da un’altra applicando uno &lt;i&gt;shift&lt;/i&gt; all’alfabeto. Questa immagine vi chiarirà tutto:
+&lt;img src=&quot;https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Caesar3.svg/300px-Caesar3.svg.png&quot; alt=&quot;cifrario di cesare&quot; /&gt;
+In questo caso, la chiave sarà la quantità di lettere traslate, nell’immagine &lt;i&gt;chiave=2&lt;/i&gt;.&lt;/p&gt;
+
+&lt;h1 id=&quot;il-problema-dello-scambio-della-chiave&quot;&gt;Il problema dello scambio della chiave&lt;/h1&gt;
+&lt;p&gt;Ecco, qui si introduce il principale problema della crittografia moderna, come scambiarsi una chiave? Di certo non posso cifrarla perchè cifrando una chiave avrei bisogno della chiave per cifrare la chiave, che a sua volta richiederebbe… Avete capito no? 
+Il modo più semplice è quello di vedersi di persona e scambiarsi la chiave, anche perchè qualsiasi altro modo potrebbe essere intercettato (una chiamate al telefono, una mail, un messaggio…).&lt;/p&gt;
+
+&lt;p&gt;A questo problema qualcuno è riuscito a trovare una soluzione. La maggior parte degli algoritmi utilizza metodi matematici quindi da ora in poi la nostra chiave sarà un numero, potete facilmente immaginare come creare un numero da una parola, ad esempio dicendo che A=1, B=2, C=3… e facendo quindi diventare la parola ABCABC = 123123.&lt;/p&gt;
+
+&lt;p&gt;Ecco, qui vorrei spiegarvi l’algoritmo ma utilizza un po’ di strumenti matematici che al liceo non insegnano, cercherò di essere più chiaro possibile.&lt;/p&gt;
+
+&lt;h5 id=&quot;allerta-qui-si-parla-di-matematica&quot;&gt;Allerta, qui si parla di matematica!!&lt;/h5&gt;
+&lt;p&gt;Introduciamo un &lt;a href=&quot;#glossario&quot;&gt;operatore matematico&lt;/a&gt; chiamato &lt;i&gt;modulo&lt;/i&gt; (mod) che restituisce come risultato il resto della divisione intera tra il primo e il secondo termine dell’operazione.&lt;/p&gt;
+
+&lt;p&gt;Facciamo un paio di esempi:&lt;/p&gt;
+
+&lt;p&gt;\[ 10 \ mod \ 3 = 1 \]&lt;/p&gt;
+
+&lt;p&gt;Questo perchè 10 diviso 3 fa 3 con il resto di 1. Se è chiaro il concetto, sapete dirmi quanto fa \( 15 \ mod\ 4  \)?
+Il risultato è 3. È interessante notare che il risultato dell’operatore modulo tra due numeri &lt;i&gt;x&lt;/i&gt; e &lt;i&gt;y&lt;/i&gt; è al più &lt;i&gt;y-1&lt;/i&gt;, altrimenti potevo dividere ancora per &lt;i&gt;y&lt;/i&gt; e il resto inferiore. Ma forse vi sto solo confondendo con questa ultima frase… Quindi, torniamo a noi.&lt;/p&gt;
+
+&lt;p&gt;Un’altro operatore che andiamo ad usare è l’elevamento a potenza, molto più familiare a tutti noi che ci dice quante volte un numero deve essere moltiplicato per se stesso:
+\[ 4^4 = 16\]&lt;/p&gt;
+
+&lt;h2 id=&quot;scambio-di-chiavi-diffie-hellman-1976-wikipedia&quot;&gt;Scambio di chiavi Diffie-Hellman (1976) &lt;a href=&quot;https://it.wikipedia.org/wiki/Scambio_di_chiavi_Diffie-Hellman&quot;&gt;Wikipedia&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;Facciamo un esempio di questo &lt;a href=&quot;#glossario&quot;&gt;protocollo&lt;/a&gt; (si, lo so, prima l’ho chiamato algoritmo ed ora protocollo, cambia la definizione ma potete pensarlo comunque come una serie di passi per trovare una soluzione al nostro problema di scambio delle chiavi, non ci formalizziamo sulle definizioni).
+Chiamiamo i due tipi che vogliono trovare una chiave condivisa comune Alice e Bob (a volte semplicemente abbreviati con A e B).&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;A e B si accordano su due numeri, \( p, g \), dove p è un numero primo e g è un &lt;a href=&quot;#glossario&quot;&gt;generatore&lt;/a&gt;. Nel nostro esempio &lt;i&gt; p = 23, g=5&lt;/i&gt;. Questi numeri vengono scambiati tra Alice e Bob in maniera del tutto normale, senza dover nascondere nulla.&lt;/li&gt;
+  &lt;li&gt;A questo punto, Alice sceglie un suo numero &lt;b&gt;segreto&lt;/b&gt; a e Bob fa lo stesso, scegliendo un numero b.
+ Nel nostro esempio: &lt;i&gt;a=6, b=15&lt;/i&gt;.&lt;/li&gt;
+  &lt;li&gt;Alice manda a Bob \(g^a\ mod\ p \), nel nostro esempio \( 5^6\ mod\ 23 = 8 \).&lt;/li&gt;
+  &lt;li&gt;Bob fa lo stesso, mandando ad Alice \(g^b\ mod\ p \), cioè \(5^{15}\ mod\ 23 = 19 \).&lt;/li&gt;
+  &lt;li&gt;A questo punto, sia Bob che Alice sono in grado di calcolare la chiave finale prendendo il numero che gli è arrivato ed elevandolo con il loro numero segreto.&lt;br /&gt;
+ Alice farà quindi \( (g^b\ mod\ p)^a\ mod\ p \) mentre Bob farà \( (g^a\ mod\ p)^b\ mod\ p \).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Al termine di queste operazioni, sia Alice che Bob sono in possesso di \(g^{ab}=g^{ba} \). E potranno usare questo come chiave condivisa.&lt;/p&gt;
+
+&lt;h5 id=&quot;allerta-qui-si-parla-di-matematica-1&quot;&gt;Allerta, qui si parla di matematica!!&lt;/h5&gt;
+&lt;p&gt;Qui arriva la parte complicata, convincervi che questa cosa funziona senza entrare in dettagli matematici complessi. Chiaramente tutta questa cosa funziona perchè usiamo quel famoso operatore &lt;i&gt;modulo&lt;/i&gt;, senza infatti quello, tutto questo protocollo crollerebbe perchè potrei facilmente capire qual era il numero segreto di Alice semplicemente facendo \( \log_g{g^a} \). (Ok, ok, forse il logaritmo non è proprio la cosa più familiare a tutti ma fidatevi, è una cosa davvero semplicissima da fare).&lt;/p&gt;
+
+&lt;p&gt;Quando invece ci troviamo con un operatore come quello del modulo, non stiamo più “giocando” con tutti i numeri come siamo abituati a fare ma entriamo in un campo un po’ strano dove invertire le operazioni non è più tanto semplice. Volete un esempio?&lt;/p&gt;
+
+&lt;p&gt;Proviamo a fare, senza usare il modulo \( 13 * 5 \). Quanto fa? Banale, fa 65. Ora, se io volessi trovare quel numero che, preso 65, lo moltiplico e mi torna due è semplice, è \( \frac{1}{5} \), difatti \( 65*\frac{1}{5} = 15\). Possiamo quindi dire che l’inverso di 5 è \( \frac{1}{5}\).&lt;/p&gt;
+
+&lt;p&gt;Bene, proviamo ora a rifare tutto questo discorso con l’operatore modulo di mezzo. Prendiamo come valore del modulo 23 (numero scelto a caso).
+\[ 13 * 5 \ mod\ 23 = 19\]
+A questo punto dobbiamo provare ad invertire l’operazione, cioè trovare un numero tale che 
+\[ 19 * 14 \ mod\ 23 = 13 \]
+Quel valore che cerchiamo è 14. Quindi, l’inverso di \( 14 \ mod\ 23 = 19 \). Come potete vedere non è banalissimo trovare gli inversi e quindi invertire operazioni così semplici come anche una semplice moltiplicazione… pensate poi se lavoriamo con numeri moooolto mooooooolto grandi.&lt;/p&gt;
+
+&lt;p&gt;Se sono riuscito quindi a convincervi che questo operatore modulo complica abbastanza le cose da rendere complesse alcune operazioni, possiamo proseguire…&lt;/p&gt;
+
+&lt;h2 id=&quot;cosa-fare-con-la-chiave-condivisa&quot;&gt;Cosa fare con la chiave condivisa&lt;/h2&gt;
+&lt;p&gt;A questo punto, abbiamo Alice e Bob che si trovano quindi con una stessa chiave che possono usare per cifrare qualsiasi messaggio con i metodi più classici che potete immaginarvi. Beh, c’è da dire che quelli usati oggi tanto classici non sono e hanno dei nomi un po’ strani, tipo AES-256 (Advanced Encryption Standard con 256 bit come lunghezza della chiave) ma si trattano, più o meno, di metodi che mischiano le lettere del vostro messaggio (più correttamente mischiano i bit che compongono le varie lettere in un formato digitale) e ne restituiscono una serie incomprensibile se non si conosce la chiave usata che permette di rimettere a posto il tutto.&lt;/p&gt;
+
+&lt;h1 id=&quot;la-crittografia-asimmetrica&quot;&gt;La crittografia asimmetrica&lt;/h1&gt;
+&lt;p&gt;Ci sono degli algoritmi e dei protocolli che non richiedono di avere una chiave scambiata in precedenza per garantire ad un mittente di spedire un messaggio cifrato ed ad un ricevente di decifrarlo correttamente. Lo so, è strana come cosa, a me sembrava magia oscura quando me l’hanno raccontata la prima volta, in realtà non è così complicata la cosa anche se, quando è stato trovato il famoso algoritmo asimmetrico RSA nel 1977 da Ronald Rivest, Adi Shamir e Leonard Adleman, la cosa non era poi così tanto scontata.&lt;/p&gt;
+
+&lt;p&gt;Nel prossimo post ve ne parlerò in maniera più dettagliata.&lt;/p&gt;
+
+&lt;div id=&quot;glossario&quot;&gt;
+
+&lt;h2&gt;Glossario&lt;/h2&gt;
+&lt;ul&gt;
+ &lt;li&gt;
+ 	&lt;b&gt;Algoritmo&lt;/b&gt;: è una serie di istruzioni svolte per risolvere un problema. Un algoritmo che tutti conoscono è quello per effettuare moltiplicazioni in colonna di numeri a più cifre, quel modo di moltiplicare le singole cifre, addizionare i vari risultati intermedi e trovare il risultato finale è un chiaro esempio di cosa è un algoritmo. Una serie di passi che porta ad un risultato.
+ &lt;/li&gt;
+ &lt;li&gt;
+ 	&lt;b&gt;Chiave&lt;/b&gt;: è una parola (solitamente si parla di sequanza di bit) che viene usata per cifrare e decifrare qualcosa. A volte viene erroneamente chiamata &lt;i&gt;password&lt;/i&gt;
+ &lt;/li&gt;
+ &lt;li&gt;
+ 	&lt;b&gt;Operatore&lt;/b&gt;: l'operatore dell'addizione è il +, l'operatore della sottrazione è il -... Insomma, l'operatore è quell'oggetto che ci indica l'operazione da fare
+ &lt;/li&gt;
+ &lt;li&gt;
+ 	&lt;b&gt;Protocollo&lt;/b&gt;: In informatica un protocollo di comunicazione è un insieme di regole formalmente descritte, definite al fine di favorire la comunicazione tra una o più entità. (Wikipedia)
+ &lt;/li&gt;
+ &lt;li&gt;
+ 	&lt;b&gt;Generatore&lt;/b&gt;: qui la cosa si fa difficile da spiegare in poche righe, vi rimando alla [pagine Wikipedia](https://it.wikipedia.org/wiki/Generatore_(teoria_dei_numeri)).
+ &lt;/li&gt;
+&lt;/ul&gt;
+
+ &lt;/div&gt;</content><category term="crittografia" /><category term="RSA" /><summary type="html">Introduzione per non tecnici alla crittografia moderna</summary></entry><entry><title type="html">Come aggiungere a WooCommerce articoli con variazione via codice (programmatically)</title><link href="http://apagiaro.it/variable-product-programmatically/" rel="alternate" type="text/html" title="Come aggiungere a WooCommerce articoli con variazione via codice (programmatically)" /><published>2017-06-27T00:00:00+02:00</published><updated>2017-06-27T00:00:00+02:00</updated><id>http://apagiaro.it/variable-product-programmatically</id><content type="html" xml:base="http://apagiaro.it/variable-product-programmatically/">&lt;p&gt;&lt;img src=&quot;http://apagiaro.it/assets/img/post-image/woocommerce.png&quot; style=&quot;float:left; margin: 15px;&quot; /&gt;Woocommerce è il più famoso plugin di Wordpress per la realizzazione di siti eCommerce. I suoi punti di forza sono tantissimi tra i quali la personalizzazione estrame dei prodotti. Il problema che però spesso si incontra è come caricare in maniera efficiente le decine e decine di prodotti senza perderci le giornate intere?&lt;/p&gt;
 
 &lt;p&gt;Quello che cercherò di fare io ora, è arrivare ad una soluzione per aggiungere prodotti con variazioni, via codice, andando quindi a velocizzare la fare di inserimento.
 &lt;br /&gt;&lt;/p&gt;
