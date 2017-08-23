@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xml" href="http://apagiaro.it/feed.xslt.xml"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.2.1">Jekyll</generator><link href="http://apagiaro.it/feed.xml" rel="self" type="application/atom+xml" /><link href="http://apagiaro.it/" rel="alternate" type="text/html" /><updated>2017-08-23T18:18:02+02:00</updated><id>http://apagiaro.it/</id><title type="html">Alessandro Pagiaro</title><subtitle>Studente di Informatica presso l'Università di Pisa. Scout a tempo perso.</subtitle><entry><title type="html">La crittografia moderna spiegata a mia mamma, parte 2</title><link href="http://apagiaro.it/intro-crittografia-2/" rel="alternate" type="text/html" title="La crittografia moderna spiegata a mia mamma, parte 2" /><published>2017-08-22T00:00:00+02:00</published><updated>2017-08-22T00:00:00+02:00</updated><id>http://apagiaro.it/intro-crittografia-2</id><content type="html" xml:base="http://apagiaro.it/intro-crittografia-2/">&lt;p&gt;Come avevamo già visto nella &lt;a href=&quot;http://apagiaro.it/intro-crittografia&quot;&gt;prima parte&lt;/a&gt;, uno dei problemi principale di quando dobbiamo cifrare qualcosa è il comunicare la chiave di decifrazione al destinatario in quanto non possiamo cifrarla in alcun modo. A risolvere questo problema ci pensano gli algoritmi di crittografia asimmetrica.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xml" href="http://apagiaro.it/feed.xslt.xml"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.2.1">Jekyll</generator><link href="http://apagiaro.it/feed.xml" rel="self" type="application/atom+xml" /><link href="http://apagiaro.it/" rel="alternate" type="text/html" /><updated>2017-08-23T18:42:31+02:00</updated><id>http://apagiaro.it/</id><title type="html">Alessandro Pagiaro</title><subtitle>Studente di Informatica presso l'Università di Pisa. Scout a tempo perso.</subtitle><entry><title type="html">La crittografia moderna spiegata a mia mamma, parte 2</title><link href="http://apagiaro.it/intro-crittografia-2/" rel="alternate" type="text/html" title="La crittografia moderna spiegata a mia mamma, parte 2" /><published>2017-08-22T00:00:00+02:00</published><updated>2017-08-22T00:00:00+02:00</updated><id>http://apagiaro.it/intro-crittografia-2</id><content type="html" xml:base="http://apagiaro.it/intro-crittografia-2/">&lt;p&gt;Come avevamo già visto nella &lt;a href=&quot;http://apagiaro.it/intro-crittografia&quot;&gt;prima parte&lt;/a&gt;, uno dei problemi principale di quando dobbiamo cifrare qualcosa è il comunicare la chiave di decifrazione al destinatario in quanto non possiamo cifrarla in alcun modo. A risolvere questo problema ci pensano gli algoritmi di crittografia asimmetrica.&lt;/p&gt;
 
 &lt;p&gt;Avete presente quel discorso fatto nella &lt;a href=&quot;http://apagiaro.it/intro-crittografia&quot;&gt;prima parte&lt;/a&gt; in cui si diceva che trovare un inverso di un numero &lt;i&gt;n&lt;/i&gt; quando c’è di mezzo l’operatore &lt;em&gt;modulo&lt;/em&gt; non è poi così tanto banale? Ecco, è proprio ancora questa cosa che venne in aiuto a Ronald Rivest, Adi Shamir e Leonard Adleman nel 1977.&lt;/p&gt;
 
@@ -523,16 +523,22 @@ Un gioco che richiama il film “Tron”. Crea una stanza, fai entrare i tuoi am
 &lt;p&gt;Nel suo canale ne trovate a decine di video così. Buona visione!&lt;/p&gt;</content><category term="javascript" /><category term="snake" /><summary type="html">Per informatici annoiati...</summary></entry><entry><title type="html">Guida alla costruzione di un ripetitore WiFi fai-da-te</title><link href="http://apagiaro.it/ripetitoreWifiDIY/" rel="alternate" type="text/html" title="Guida alla costruzione di un ripetitore WiFi fai-da-te" /><published>2017-04-20T00:00:00+02:00</published><updated>2017-04-20T00:00:00+02:00</updated><id>http://apagiaro.it/ripetitoreWifiDIY</id><content type="html" xml:base="http://apagiaro.it/ripetitoreWifiDIY/">&lt;p&gt;Vediamo oggi come realizzare un ripetitore WiFi a bassissimo costo, con un poco di ingegno e manualità.&lt;/p&gt;
 
 &lt;h1 id=&quot;componenti-e-circuito&quot;&gt;Componenti e circuito&lt;/h1&gt;
-&lt;p&gt;Per questo progetto useremo
-	- &lt;a href=&quot;https://it.aliexpress.com/item/ESP8266-Serial-WIFI-Wireless-Module-Wireless-Transceiver-The-Internet-of-Things/32220713885.html?ws_ab_test=searchweb0_0,searchweb201602_2_10152_10065_10151_10068_10084_10083_10080_10082_10081_10177_10110_10136_10137_10111_10060_10138_10112_10113_10155_10062_10114_10156_10154_10056_10055_10054_10059_10099_10078_10079_10103_10073_10102_10096_10070_10148_10123_10147_10052_10053_10124_10142_10107_10050_10143_10051,searchweb201603_9,afswitch_1,ppcSwitch_4&amp;amp;btsid=aa9e5f6f-a5a8-43c3-9be0-2db34901e1ee&amp;amp;algo_expid=48192ddc-1ccd-4e63-9ec6-121a3f900737-0&amp;amp;algo_pvid=48192ddc-1ccd-4e63-9ec6-121a3f900737&quot;&gt;Modulo WiFi ESP-01&lt;/a&gt;, con microcontrollore ESP8266 - 1,70€
-	- &lt;a href=&quot;https://www.amazon.it/s/ref=nb_sb_noss_2?__mk_it_IT=ÅMÅŽÕÑ&amp;amp;url=search-alias%3Daps&amp;amp;field-keywords=scheda+millefori&quot;&gt;Scheda millefori&lt;/a&gt;, 1€ al negozio di elettronica sotto casa
-	- Altri componenti minori (1,5€)
-		- Un condensatore
-		- 1 Resistenza 3.3KOhm
-		- 1 Resistenza 5.6KOhm
-		- 10 Pin Header
-		- 1 LM317T
-	- &lt;a href=&quot;http://www.ebay.it/itm/6Pin-USB-2-0-to-TTL-UART-Module-Serial-Converter-CP2102-STC-Replace-FT232-/122146759977?hash=item1c7083a529:g:uVoAAOSwPCVX47b1&quot;&gt;Connettore USB-SerialPin&lt;/a&gt;, 3€ su eBay (vi servirà solo all’inizio, potete farvela prestare)&lt;/p&gt;
+&lt;p&gt;Per questo progetto useremo&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://it.aliexpress.com/item/ESP8266-Serial-WIFI-Wireless-Module-Wireless-Transceiver-The-Internet-of-Things/32220713885.html?ws_ab_test=searchweb0_0,searchweb201602_2_10152_10065_10151_10068_10084_10083_10080_10082_10081_10177_10110_10136_10137_10111_10060_10138_10112_10113_10155_10062_10114_10156_10154_10056_10055_10054_10059_10099_10078_10079_10103_10073_10102_10096_10070_10148_10123_10147_10052_10053_10124_10142_10107_10050_10143_10051,searchweb201603_9,afswitch_1,ppcSwitch_4&amp;amp;btsid=aa9e5f6f-a5a8-43c3-9be0-2db34901e1ee&amp;amp;algo_expid=48192ddc-1ccd-4e63-9ec6-121a3f900737-0&amp;amp;algo_pvid=48192ddc-1ccd-4e63-9ec6-121a3f900737&quot;&gt;Modulo WiFi ESP-01&lt;/a&gt;, con microcontrollore ESP8266 - 1,70€&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.amazon.it/s/ref=nb_sb_noss_2?__mk_it_IT=ÅMÅŽÕÑ&amp;amp;url=search-alias%3Daps&amp;amp;field-keywords=scheda+millefori&quot;&gt;Scheda millefori&lt;/a&gt;, 1€ al negozio di elettronica sotto casa&lt;/li&gt;
+  &lt;li&gt;Altri componenti minori (1,5€)
+    &lt;ul&gt;
+      &lt;li&gt;Un condensatore&lt;/li&gt;
+      &lt;li&gt;1 Resistenza 3.3KOhm&lt;/li&gt;
+      &lt;li&gt;1 Resistenza 5.6KOhm&lt;/li&gt;
+      &lt;li&gt;10 Pin Header&lt;/li&gt;
+      &lt;li&gt;1 LM317T&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://www.ebay.it/itm/6Pin-USB-2-0-to-TTL-UART-Module-Serial-Converter-CP2102-STC-Replace-FT232-/122146759977?hash=item1c7083a529:g:uVoAAOSwPCVX47b1&quot;&gt;Connettore USB-SerialPin&lt;/a&gt;, 3€ su eBay (vi servirà solo all’inizio, potete farvela prestare)&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;h1 id=&quot;costruiamo-il-circuito&quot;&gt;Costruiamo il circuito&lt;/h1&gt;
 &lt;p&gt;Per iniziare dobbiamo costruire il circuito per far funzionare il tutto. Lo schema è il seguente (è lo stesso usato nel &lt;a href=&quot;http://apagiaro.it/meshweather/&quot;&gt;progetto della rete mesh&lt;/a&gt;):
