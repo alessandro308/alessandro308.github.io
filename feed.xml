@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xml" href="http://apagiaro.it/feed.xslt.xml"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.2.1">Jekyll</generator><link href="http://apagiaro.it/feed.xml" rel="self" type="application/atom+xml" /><link href="http://apagiaro.it/" rel="alternate" type="text/html" /><updated>2017-08-24T15:34:19+02:00</updated><id>http://apagiaro.it/</id><title type="html">Alessandro Pagiaro</title><subtitle>Studente di Informatica presso l'Università di Pisa. Scout a tempo perso.</subtitle><entry><title type="html">Man-in-the-middle per tutti con Bettercap</title><link href="http://apagiaro.it/bettercap/" rel="alternate" type="text/html" title="Man-in-the-middle per tutti con Bettercap" /><published>2017-08-22T00:00:00+02:00</published><updated>2017-08-22T00:00:00+02:00</updated><id>http://apagiaro.it/bettercap</id><content type="html" xml:base="http://apagiaro.it/bettercap/">&lt;p&gt;Una delle cose che ci si immagina, quando si pensa alla sicurezza informatica, è l’intercettare e modificare il traffico internet di un computer &lt;em&gt;target&lt;/em&gt; per fare quello che ci occorre.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xml" href="http://apagiaro.it/feed.xslt.xml"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.2.1">Jekyll</generator><link href="http://apagiaro.it/feed.xml" rel="self" type="application/atom+xml" /><link href="http://apagiaro.it/" rel="alternate" type="text/html" /><updated>2017-08-24T15:36:56+02:00</updated><id>http://apagiaro.it/</id><title type="html">Alessandro Pagiaro</title><subtitle>Studente di Informatica presso l'Università di Pisa. Scout a tempo perso.</subtitle><entry><title type="html">Man-in-the-middle per tutti con Bettercap</title><link href="http://apagiaro.it/bettercap/" rel="alternate" type="text/html" title="Man-in-the-middle per tutti con Bettercap" /><published>2017-08-22T00:00:00+02:00</published><updated>2017-08-22T00:00:00+02:00</updated><id>http://apagiaro.it/bettercap</id><content type="html" xml:base="http://apagiaro.it/bettercap/">&lt;p&gt;Una delle cose che ci si immagina, quando si pensa alla sicurezza informatica, è l’intercettare e modificare il traffico internet di un computer &lt;em&gt;target&lt;/em&gt; per fare quello che ci occorre.&lt;/p&gt;
 
 &lt;div class=&quot;notice&quot;&gt;
 &lt;h3&gt;Attenzione!!!&lt;/h3&gt;
@@ -23,6 +23,8 @@ Blocchiamoci un attimo prima di fare qualsiasi cosa, se intercettate traffico o 
 &lt;p&gt;Insomma, è un bell’oggettino per fare man-in-the-middle (MITM) con pochi comandi da terminale, nel mio caso, divertirsi un po’ tra coinquilini e farsi &lt;em&gt;code injection&lt;/em&gt; a vicenda.&lt;/p&gt;
 
 &lt;p&gt;A questo punto, se ne sai un pochino di reti, vai direttamente sul &lt;a href=&quot;https://www.bettercap.org&quot;&gt;sito ufficiale&lt;/a&gt; che ti risulterà più veloce di questa guida, altrimenti continua pure…&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://www.cyberciti.biz/media/new/tips/2007/08/linux-internet-model-network-stack.gif&quot; alt=&quot;Network Layers&quot; /&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;come-sono-fatte-le-reti&quot;&gt;Come sono fatte le reti&lt;/h1&gt;
 &lt;p&gt;Innanzitutto occorre dire qualche cosina sulle reti. Parlavo con un mio amico che mi chiedeva &lt;strong&gt;se, analizzando le onde radio che passavano vicino al mio computer, fossi in grado di vedere cosa gli altri stessero facendo.&lt;/strong&gt;&lt;/p&gt;
@@ -82,6 +84,8 @@ Per vedere la tabella ARP del tuo computer UNIX (cioè Linux, Mac o altre cosett
 &lt;/div&gt;
 
 &lt;p&gt;che manda quei pacchetti per dirottare il traffico sia al &lt;em&gt;target&lt;/em&gt; che al router (contrariamente effettua un attacco &lt;em&gt;half-duplex&lt;/em&gt; citato prima), potendo così vedere la botta e risposta completa, le pagine richieste e quelle ricevute dalla rete.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://www.dreamgroup.it/wp-content/uploads/2017/01/CKe4csi.png&quot; alt=&quot;https&quot; /&gt;&lt;/p&gt;
 
 &lt;h1 id=&quot;e-la-cifratura&quot;&gt;E la cifratura?&lt;/h1&gt;
 
