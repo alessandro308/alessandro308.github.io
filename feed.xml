@@ -1,4 +1,51 @@
-<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xml" href="http://apagiaro.it/feed.xslt.xml"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.2.1">Jekyll</generator><link href="http://apagiaro.it/feed.xml" rel="self" type="application/atom+xml" /><link href="http://apagiaro.it/" rel="alternate" type="text/html" /><updated>2017-09-25T10:11:00+02:00</updated><id>http://apagiaro.it/</id><title type="html">Alessandro Pagiaro</title><subtitle>Studente di Informatica presso l'Università di Pisa. Scout a tempo perso.</subtitle><entry><title type="html">La crittografia moderna spiegata a mia mamma, parte 3</title><link href="http://apagiaro.it/intro-crittografia-3/" rel="alternate" type="text/html" title="La crittografia moderna spiegata a mia mamma, parte 3 " /><published>2017-08-26T00:00:00+02:00</published><updated>2017-08-26T00:00:00+02:00</updated><id>http://apagiaro.it/intro-crittografia-3</id><content type="html" xml:base="http://apagiaro.it/intro-crittografia-3/">&lt;p&gt;Dopo aver visto nella &lt;a href=&quot;http://apagiaro.it/intro-crittografia&quot;&gt;prima parte&lt;/a&gt; come scambiarsi una chiave senza doverla comunicare in chiaro, abbiamo visto nella &lt;a href=&quot;http://apagiaro.it/intro-crittografia-2&quot;&gt;seconda parte&lt;/a&gt; come è possibile scambiarsi messaggi cifrati senza neanche doversi scambiare una chiave, tramite l’uso dell’RSA.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><?xml-stylesheet type="text/xml" href="http://apagiaro.it/feed.xslt.xml"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.2.1">Jekyll</generator><link href="http://apagiaro.it/feed.xml" rel="self" type="application/atom+xml" /><link href="http://apagiaro.it/" rel="alternate" type="text/html" /><updated>2017-10-03T15:22:25+02:00</updated><id>http://apagiaro.it/</id><title type="html">Alessandro Pagiaro</title><subtitle>Studente di Informatica presso l'Università di Pisa. Scout a tempo perso.</subtitle><entry><title type="html">How create sorted run for merge-sort larger than M (memory size)</title><link href="http://apagiaro.it/snowplow-algorithm/" rel="alternate" type="text/html" title="How create sorted run for merge-sort larger than M (memory size)" /><published>2017-08-26T00:00:00+02:00</published><updated>2017-08-26T00:00:00+02:00</updated><id>http://apagiaro.it/snowplow-algorithm</id><content type="html" xml:base="http://apagiaro.it/snowplow-algorithm/">&lt;p&gt;If we design an algoritmh and we stop thinking about CPU time and focus our attention on main bottleneck of “computer speed”, we have to fucus our attention on IO access in (main) memory. Moreover this introduce new problem, how to optimize access in memory?&lt;/p&gt;
+
+&lt;p&gt;If I design a mergesort algorithm, I’ll find useful to build a &lt;em&gt;k-way mergesort&lt;/em&gt; where the complexity decrease when the run size increas [1]. So it’s useful to find a way to create a sorted run as long as we can.&lt;/p&gt;
+
+&lt;p&gt;We can use some tecnique, one of them called Algorithm R (Replacement selection) by Knuth [2], or, more funny, the snowplow algorithm. It outputs a sorted runs of size greater that &lt;code class=&quot;highlighter-rouge&quot;&gt;M&lt;/code&gt; (memory size), with average size equal to &lt;code class=&quot;highlighter-rouge&quot;&gt;2M&lt;/code&gt; and then you can use this sorted runs as input in a (&lt;em&gt;k-way&lt;/em&gt;) mergesort.&lt;/p&gt;
+
+&lt;h2 id=&quot;step-1&quot;&gt;Step 1&lt;/h2&gt;
+&lt;p&gt;First of all you need to create an min heaptree with M element in main memory. This tree can be build in &lt;code class=&quot;highlighter-rouge&quot;&gt;O(n)&lt;/code&gt; time.&lt;/p&gt;
+
+&lt;h2 id=&quot;step-2&quot;&gt;Step 2&lt;/h2&gt;
+&lt;p&gt;Get an element &lt;code class=&quot;highlighter-rouge&quot;&gt;e&lt;/code&gt; from unsorted set (saved in external memory), and then compare it with the minimum element &lt;code class=&quot;highlighter-rouge&quot;&gt;m&lt;/code&gt; extracted from min-headtree.&lt;/p&gt;
+
+&lt;h5 id=&quot;case-1&quot;&gt;Case 1&lt;/h5&gt;
+&lt;p&gt;If the element is less then extracted one, i.d. &lt;code class=&quot;highlighter-rouge&quot;&gt;e &amp;lt; m&lt;/code&gt;, then put &lt;code class=&quot;highlighter-rouge&quot;&gt;e&lt;/code&gt; in unsorted bucket in main memory and send &lt;code class=&quot;highlighter-rouge&quot;&gt;e&lt;/code&gt; to output.&lt;/p&gt;
+
+&lt;h5 id=&quot;case-2&quot;&gt;Case 2&lt;/h5&gt;
+&lt;p&gt;Else if the element is greater than the minimum, i.d. &lt;code class=&quot;highlighter-rouge&quot;&gt;e &amp;gt; m&lt;/code&gt; then send &lt;code class=&quot;highlighter-rouge&quot;&gt;m&lt;/code&gt; to output and add new element &lt;code class=&quot;highlighter-rouge&quot;&gt;e&lt;/code&gt; in heaptree then heapify the tree - &lt;code class=&quot;highlighter-rouge&quot;&gt;O(log n)&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;step-3&quot;&gt;Step 3&lt;/h2&gt;
+&lt;p&gt;If heapTree is empty&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;build a new heaptree with unsorted element put in main mamory bucket
+-(notice that if heaptree is empty, the unsorted bucket contains M-1 elements)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;else&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;back to First Step&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;If the external sorted elements in external memory ends, extract min from min-headtree until it became empty.&lt;/p&gt;
+
+&lt;h1 id=&quot;example&quot;&gt;Example&lt;/h1&gt;
+
+&lt;p&gt;Here I provide a small example to show how this algorithm works.
+&lt;img src=&quot;http://apagiaro.it/assets/img/post-image/snowplow.jpg&quot; alt=&quot;SnowPlow Algorithm Example&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;So the sorted runs are:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;2 3 6 23 54 61&lt;/li&gt;
+  &lt;li&gt;1 5 9 42&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+&lt;p&gt;[1] The magic of Algorithm, lecture notes of Paolo Ferragina&lt;/p&gt;
+
+&lt;p&gt;[2] Donald E. Knuth. The Art of Computer Programming: volume 3. Addison-Wesley, 2nd
+Edition, 1998.&lt;/p&gt;</content><category term="algorithm" /><category term="english" /><summary type="html">A simple algorithm to create runs larger than memory size</summary></entry><entry><title type="html">La crittografia moderna spiegata a mia mamma, parte 3</title><link href="http://apagiaro.it/intro-crittografia-3/" rel="alternate" type="text/html" title="La crittografia moderna spiegata a mia mamma, parte 3 " /><published>2017-08-26T00:00:00+02:00</published><updated>2017-08-26T00:00:00+02:00</updated><id>http://apagiaro.it/intro-crittografia-3</id><content type="html" xml:base="http://apagiaro.it/intro-crittografia-3/">&lt;p&gt;Dopo aver visto nella &lt;a href=&quot;http://apagiaro.it/intro-crittografia&quot;&gt;prima parte&lt;/a&gt; come scambiarsi una chiave senza doverla comunicare in chiaro, abbiamo visto nella &lt;a href=&quot;http://apagiaro.it/intro-crittografia-2&quot;&gt;seconda parte&lt;/a&gt; come è possibile scambiarsi messaggi cifrati senza neanche doversi scambiare una chiave, tramite l’uso dell’RSA.&lt;/p&gt;
 
 &lt;p&gt;Lo scopo di oggi è vedere come sfruttare l’RSA, o qualsiasi altro algoritmo di cifratura asimmetrico, per verificare l’identità di un mittente come se lui lo avesse firmato.&lt;/p&gt;
 
@@ -938,35 +985,4 @@ show config
 &lt;iframe src=&quot;http://apagiaro.it/mesh/esempio2.html&quot; height=&quot;450px&quot; width=&quot;700px&quot;&gt;&lt;/iframe&gt;
 
 &lt;h2 id=&quot;temi&quot;&gt;Temi&lt;/h2&gt;
-&lt;p&gt;Questo framework contiene anche numerosi temi che possono essere applicati semplicemente cambiato il css importanto nell’header della pagina. A &lt;a href=&quot;http://apagiaro.it/mesh/theme_example.html&quot;&gt;questa pagina&lt;/a&gt; potete trovare un’anteprima dei temi disponibili nella repository del framework su GitHub.&lt;/p&gt;</content><category term="javascript" /><category term="HTML5" /><summary type="html">Un framework per le presentazioni in HTML</summary></entry><entry><title type="html">meshWeather</title><link href="http://apagiaro.it/meshweather/" rel="alternate" type="text/html" title="meshWeather" /><published>2017-04-14T00:00:00+02:00</published><updated>2017-04-14T00:00:00+02:00</updated><id>http://apagiaro.it/meshweather</id><content type="html" xml:base="http://apagiaro.it/meshweather/">&lt;p&gt;L’idea di questo progetto è la realizzazione di una rete mesh con i circuiti ESP-01. Il network viene poi impiegato per il monitoraggio delle condizione metereologiche in un campo tramite l’utilizzo di stazioni meteo basate su Arduino, ma l’idea si può estendere facilmente con altri utilizzi sostituendo semplicemente i dati raccolti dalle stazioni.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://apagiaro.it/assets/img/post-image/esempio.png&quot; style=&quot;width: 450px !important;&quot; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&quot;hardware&quot;&gt;Hardware&lt;/h2&gt;
-&lt;p&gt;&lt;img src=&quot;http://apagiaro.it/assets/img/post-image/ESP-01.jpg&quot; align=&quot;left&quot; /&gt;
-Il progetto è realizzato impiegando tutto hardware a bassissimo costo. Per la rete mesh sono stati impiegati i chip ESP-01 che utilizzano il microcontrollare ESP8266 prodotto dalle EspressIF.&lt;/p&gt;
-
-&lt;p&gt;Questo modulo viene, di solito, venduto con il firmware AT preinstallato. Seguendo tuttavia semplici guide online, come ad esempio &lt;a href=&quot;https://h3ron.com/post/programmare-lesp8266-ovvero-arduino-con-il-wifi-a-meno-di-2/&quot;&gt;questa&lt;/a&gt; è possibile flashare il firmware nodeMCU e scrivere il proprio sketch.&lt;/p&gt;
-
-&lt;h2 id=&quot;costruire-la-rete-mesh&quot;&gt;Costruire la rete mesh&lt;/h2&gt;
-&lt;p&gt;Capito come si fa a caricare il proprio firmware e sketch, abbiamo cercato una libreria che potesse aiutarci trovando &lt;a href=&quot;https://github.com/Coopdis/easyMesh&quot;&gt;easyMesh&lt;/a&gt;, sulla quale stiamo scrivendo il nostro protocollo di comunicazione.&lt;/p&gt;
-
-&lt;p&gt;Poichè la rete che andiamo a costruire è statica, cioè i nodi non sono mobili, abbiamo scritto un protocollo di rete ispirato al distance vector che si preoccupa di cercare la strada migliore dalla stazione meteo che emette di dati al server che li analizza. I nodi intermedi si fanno carico di gestire l’instradamento e, in caso di fallimento, di rispedire il pacchetto arrivato fino a loro senza propagare l’errore all’indietro.&lt;/p&gt;
-
-&lt;h2 id=&quot;il-circuito-per-far-funzionare-il-tutto&quot;&gt;Il circuito per far funzionare il tutto&lt;/h2&gt;
-&lt;p&gt;Per flashare i firmware è stato progettato un circuito che permette di passare dalla modalita bootloading ad una usage, la cui differenza è l’attacco di un pin del debugger seriale.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://apagiaro.it/assets/img/post-image/devSerial.png&quot; alt=&quot;&quot; /&gt;
-&lt;em&gt;Modalità debugging&lt;/em&gt;
-&lt;img src=&quot;http://apagiaro.it/assets/img/post-image/usageSerial.png&quot; alt=&quot;&quot; /&gt;
-&lt;em&gt;Modalità usage&lt;/em&gt;&lt;/p&gt;
-
-&lt;p&gt;Il circuito che permette tutto questo potete trovarlo sulla repository di Friting &lt;a href=&quot;http://fritzing.org/projects/esp01-development-board&quot;&gt;qui&lt;/a&gt;, caricato dall’utente mastroGeppetto.&lt;/p&gt;
-
-&lt;p&gt;Il circuito semplificato per il solo utilizzo, pensato per un’utilizzo tramite batteria, potete trovarlo &lt;a href=&quot;http://apagiaro.it/assets/only-usage.fzz&quot;&gt;qui&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2 id=&quot;presentazione-del-progetto&quot;&gt;Presentazione del progetto&lt;/h2&gt;
-&lt;iframe src=&quot;http://apagiaro.it/mesh&quot; height=&quot;450px&quot; width=&quot;700px&quot;&gt;&lt;/iframe&gt;
-
-&lt;h1 id=&quot;altre-idee&quot;&gt;Altre idee&lt;/h1&gt;
-&lt;p&gt;Cercando soluzioni per questo progetto mi sono imbattuto in un progetto per la realizzazione di un Wifi-Extender con questo modulo da 2€. Potete approfondire il progetto &lt;a href=&quot;http://apagiaro.it/ripetitoreWifiDIY/&quot;&gt;sulla pagina&lt;/a&gt; in cui ne parlo in maniera più specifica.&lt;/p&gt;</content><category term="ESP8266" /><category term="Arduino" /><category term="Elettronica" /><summary type="html">Un sistema decentralizzato per il monitoraggio del meteo</summary></entry></feed>
+&lt;p&gt;Questo framework contiene anche numerosi temi che possono essere applicati semplicemente cambiato il css importanto nell’header della pagina. A &lt;a href=&quot;http://apagiaro.it/mesh/theme_example.html&quot;&gt;questa pagina&lt;/a&gt; potete trovare un’anteprima dei temi disponibili nella repository del framework su GitHub.&lt;/p&gt;</content><category term="javascript" /><category term="HTML5" /><summary type="html">Un framework per le presentazioni in HTML</summary></entry></feed>

@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
+<loc>http://apagiaro.it/snowplow-algorithm/</loc>
+<lastmod>2017-08-26T00:00:00+02:00</lastmod>
+</url>
+<url>
 <loc>http://apagiaro.it/intro-crittografia-3/</loc>
 <lastmod>2017-08-26T00:00:00+02:00</lastmod>
 </url>
@@ -52,19 +56,19 @@
 <loc>http://apagiaro.it/404</loc>
 </url>
 <url>
-<loc>http://apagiaro.it/</loc>
-</url>
-<url>
 <loc>http://apagiaro.it/tags/</loc>
 </url>
 <url>
-<loc>http://apagiaro.it/projects/</loc>
+<loc>http://apagiaro.it/</loc>
+</url>
+<url>
+<loc>http://apagiaro.it/about/</loc>
 </url>
 <url>
 <loc>http://apagiaro.it/posts/</loc>
 </url>
 <url>
-<loc>http://apagiaro.it/about/</loc>
+<loc>http://apagiaro.it/projects/</loc>
 </url>
 <url>
 <loc>http://apagiaro.it/assets/main.pdf</loc>
